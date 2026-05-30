@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-class Sercurity {
+class Security {
 public:
     static std::string hash(const std::string& password);
     static std::string toHex(const std::string& data);

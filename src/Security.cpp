@@ -4,11 +4,11 @@
 #include <sstream>
 #include <iomanip>
 
-std::string Sercurity::hash(const std::string& password) {
+std::string Security::hash(const std::string& password) {
     return std::to_string(std::hash<std::string>{}(password));
 }
 
-std::string Sercurity::toHex(const std::string& data) {
+std::string Security::toHex(const std::string& data) {
     std::stringstream ss;
 
     for(unsigned char c : data) {
@@ -21,7 +21,7 @@ std::string Sercurity::toHex(const std::string& data) {
     return ss.str();
 }
 
-std::string Sercurity::hexToStr(const std::string& hex) {
+std::string Security::hexToStr(const std::string& hex) {
     std::string res;
 
     if(hex.length() % 2 != 0) {

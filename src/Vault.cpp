@@ -51,7 +51,7 @@ bool Vault::hasLPTVPassword() {
 
 void Vault::setLPTVPassword(const std::string& password) {
     std::ofstream file(Constants::MASTER_FILE);
-    file << Sercurity::hash(password);
+    file << Security::hash(password);
 }
 
 bool Vault::verifyLPTV(const std::string& password) {
@@ -60,5 +60,5 @@ bool Vault::verifyLPTV(const std::string& password) {
     std::string savedHash;
     std::getline(file, savedHash);
 
-    return savedHash == Sercurity::hash(password);
+    return savedHash == Security::hash(password);
 }
