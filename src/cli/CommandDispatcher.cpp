@@ -37,6 +37,7 @@ int CommandDispatcher::execute(const Command& cmd) {
             << "lptv status          - Check vault status\n"
             << "lptv shell           - Enter interactive mode\n"
             << "lptv list [cat]      - List services (optional category filter)\n"
+            << "lptv search <query>  - Search accounts by service, username, or category\n"
             << "lptv add <svc>       - Add a new account\n"
             << "lptv update <svc>    - Update an account\n"
             << "lptv get <svc>       - Get account details\n"
@@ -155,6 +156,18 @@ int CommandDispatcher::execute(const Command& cmd) {
         PasswordManager lptv;
         std::string category = cmd.args.empty() ? "" : cmd.args[0];
         lptv.list(category);
+        return 0;
+    }
+
+    if(cmd.name == "search") {
+        if(!requireUnlock()) return 0;
+        if(cmd.args.empty()) {
+            std::cout << "Missing search query.\n";
+            return 0;
+        }
+
+        PasswordManager lptv;
+        lptv.search(cmd.args[0]);
         return 0;
     }
 

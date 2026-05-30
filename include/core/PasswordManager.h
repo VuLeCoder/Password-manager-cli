@@ -10,6 +10,7 @@ public:
     PasswordManager();
 
     void list(const std::string& categoryFilter = "") const;
+    void search(const std::string& query) const;
     void add(const std::string& service);
     void update(const std::string& service);
     void get(const std::string& service) const;

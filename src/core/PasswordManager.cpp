@@ -5,6 +5,14 @@
 
 #include <iostream>
 #include <limits>
+#include <algorithm>
+#include <cctype>
+
+static std::string toLower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+    return s;
+}
 
 // === === private === ===
 Account* PasswordManager::findAccount(const std::string& service) {
@@ -60,6 +68,37 @@ Account PasswordManager::inputAccount(const std::string& service) {
 // === === public === ===
 PasswordManager::PasswordManager() {
     accounts = Storage::load(Constants::VAULT_DB);
+}
+
+void PasswordManager::search(const std::string& query) const {
+    if (accounts.empty()) {
+        std::cout << "No accounts.\n";
+        return;
+    }
+
+    std::string lQuery = toLower(query);
+    std::vector<std::string> headers = {"Service", "Username", "Category"};
+    std::vector<std::vector<std::string>> rows;
+
+    for (const auto& account : accounts) {
+        if (toLower(account.getService()).find(lQuery) != std::string::npos ||
+            toLower(account.getUsername()).find(lQuery) != std::string::npos ||
+            toLower(account.getCategory()).find(lQuery) != std::string::npos) 
+        {
+            rows.push_back({
+                account.getService(),
+                account.getUsername(),
+                account.getCategory()
+            });
+        }
+    }
+
+    if (rows.empty()) {
+        std::cout << "No matches found for '" << query << "'.\n";
+        return;
+    }
+
+    Console::printTable(headers, rows);
 }
 
 void PasswordManager::list(const std::string& categoryFilter) const
