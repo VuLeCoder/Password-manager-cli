@@ -39,6 +39,7 @@ bool Storage::save(
         data += account.getService() + "|"
             + account.getUsername() + "|"
             + account.getPassword() + "|"
+            + account.getCategory() + "|"
             + account.getNote() + "\n";
     }
     file << Encryptor::encrypt(data, KEY);
@@ -74,19 +75,12 @@ std::vector<Account> Storage::load(
         auto parts = split(line, '|');
 
         if(parts.size() == 3) {
-            parts.emplace_back("");
+            accounts.emplace_back(parts[0], parts[1], parts[2], "", "");
+        } else if(parts.size() == 4) {
+            accounts.emplace_back(parts[0], parts[1], parts[2], "", parts[3]);
+        } else if(parts.size() == 5) {
+            accounts.emplace_back(parts[0], parts[1], parts[2], parts[3], parts[4]);
         }
-
-        if(parts.size() != 4) {
-            continue;
-        }
-
-        accounts.emplace_back(
-            parts[0],
-            parts[1],
-            parts[2],
-            parts[3]
-        );
     }
     
     return accounts;

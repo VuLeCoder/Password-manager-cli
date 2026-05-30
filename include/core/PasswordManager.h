@@ -9,7 +9,7 @@ private:
 public:
     PasswordManager();
 
-    void list() const;
+    void list(const std::string& categoryFilter = "") const;
     void add(const std::string& service);
     void update(const std::string& service);
     void get(const std::string& service) const;

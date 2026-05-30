@@ -6,6 +6,7 @@ private:
     std::string service;
     std::string username;
     std::string password;
+    std::string category;
     std::string note;
 
 public:
@@ -15,16 +16,19 @@ public:
         const std::string& service,
         const std::string& username,
         const std::string& password,
+        const std::string& category,
         const std::string& note
     );
 
     const std::string& getService() const;
     const std::string& getUsername() const;
     const std::string& getPassword() const;
+    const std::string& getCategory() const;
     const std::string& getNote() const;
 
     void setService(const std::string& service);
     void setUsername(const std::string& username);
     void setPassword(const std::string& password);
+    void setCategory(const std::string& category);
     void setNote(const std::string& note);
 };

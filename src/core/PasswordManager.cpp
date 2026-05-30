@@ -32,6 +32,7 @@ bool PasswordManager::save() {
 Account PasswordManager::inputAccount(const std::string& service) {
     std::string username;
     std::string password;
+    std::string category;
     std::string note;
 
     std::cout << "Username: ";
@@ -40,6 +41,9 @@ Account PasswordManager::inputAccount(const std::string& service) {
     std::cout << "Password: ";
     std::getline(std::cin, password);
 
+    std::cout << "Category: ";
+    std::getline(std::cin, category);
+
     std::cout << "Note: ";
     std::getline(std::cin, note);
 
@@ -47,6 +51,7 @@ Account PasswordManager::inputAccount(const std::string& service) {
         service,
         username,
         password,
+        category,
         note
     );
 }
@@ -57,21 +62,35 @@ PasswordManager::PasswordManager() {
     accounts = Storage::load(Constants::VAULT_DB);
 }
 
-void PasswordManager::list() const
+void PasswordManager::list(const std::string& categoryFilter) const
 {
     if(accounts.empty()) {
         std::cout << "No accounts.\n";
         return;
     }
 
-    std::vector<std::string> headers = {"Service", "Username"};
+    std::vector<std::string> headers = {"Service", "Username", "Category"};
     std::vector<std::vector<std::string>> rows;
 
     for(const auto& account : accounts) {
+        if (!categoryFilter.empty() && account.getCategory() != categoryFilter) {
+            continue;
+        }
+
         rows.push_back({
             account.getService(),
-            account.getUsername()
+            account.getUsername(),
+            account.getCategory()
         });
+    }
+
+    if (rows.empty()) {
+        if (!categoryFilter.empty()) {
+            std::cout << "No accounts in category '" << categoryFilter << "'.\n";
+        } else {
+            std::cout << "No accounts.\n";
+        }
+        return;
     }
 
     Console::printTable(headers, rows);
@@ -119,6 +138,7 @@ void PasswordManager::update(const std::string& service) {
     Account acc = inputAccount(service);
     existsAcc->setUsername(acc.getUsername());
     existsAcc->setPassword(acc.getPassword());
+    existsAcc->setCategory(acc.getCategory());
     existsAcc->setNote(acc.getNote());
 
     if(save()) {
@@ -138,6 +158,7 @@ void PasswordManager::get(const std::string& service) const {
     std::cout << "Service : " << account->getService() << "\n";
     std::cout << "Username: " << account->getUsername() << "\n";
     std::cout << "Password: " << account->getPassword() << "\n";
+    std::cout << "Category: " << account->getCategory() << "\n";
     std::cout << "Note    : " << account->getNote() << "\n";
 
     std::cout << "\nCopy password to clipboard? (y/n): ";

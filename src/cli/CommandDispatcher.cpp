@@ -36,7 +36,7 @@ int CommandDispatcher::execute(const Command& cmd) {
             << "lptv lock            - Lock the vault\n"
             << "lptv status          - Check vault status\n"
             << "lptv shell           - Enter interactive mode\n"
-            << "lptv list            - List all services\n"
+            << "lptv list [cat]      - List services (optional category filter)\n"
             << "lptv add <svc>       - Add a new account\n"
             << "lptv update <svc>    - Update an account\n"
             << "lptv get <svc>       - Get account details\n"
@@ -153,7 +153,8 @@ int CommandDispatcher::execute(const Command& cmd) {
         if(!requireUnlock()) return 0;
 
         PasswordManager lptv;
-        lptv.list();
+        std::string category = cmd.args.empty() ? "" : cmd.args[0];
+        lptv.list(category);
         return 0;
     }
 
