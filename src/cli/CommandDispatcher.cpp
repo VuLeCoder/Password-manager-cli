@@ -30,7 +30,7 @@ bool CommandDispatcher::requireService(const Command& cmd) {
 // === === public === ===
 int CommandDispatcher::execute(const Command& cmd) {
     if(cmd.name == "help") {
-        std::cout
+        std::cout << "\n === === === === === === === === === === ===\n"
             << "lptv init            - Initialize the vault\n"
             << "lptv unlock          - Unlock the vault\n"
             << "lptv lock            - Lock the vault\n"
@@ -41,7 +41,8 @@ int CommandDispatcher::execute(const Command& cmd) {
             << "lptv add <svc>       - Add a new account\n"
             << "lptv update <svc>    - Update an account\n"
             << "lptv get <svc>       - Get account details\n"
-            << "lptv delete <svc>    - Delete an account\n";
+            << "lptv delete <svc>    - Delete an account\n"
+            << "=== === === === === === === === === === ===\n";
 
         return 0;
     }
