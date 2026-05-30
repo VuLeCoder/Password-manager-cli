@@ -1,8 +1,9 @@
-#include "./../include/AuthGuard.h"
-#include "./../include/CommandDispatcher.h"
-#include "./../include/Vault.h"
-#include "./../include/PasswordManager.h"
-#include "./../include/Console.h"
+#include "./../../include/cli/CommandDispatcher.h"
+#include "./../../include/cli/Console.h"
+
+#include "./../../include/core/AuthGuard.h"
+#include "./../../include/core/PasswordManager.h"
+#include "./../../include/core/Vault.h"
 
 #include <iostream>
 

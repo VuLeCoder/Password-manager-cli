@@ -1,5 +1,5 @@
-#include "../include/CommandParser.h"
-#include "../include/CommandDispatcher.h"
+#include "./../include/cli/CommandDispatcher.h"
+#include "./../include/cli/CommandParser.h"
 
 int main(int argc, char* argv[]){
     auto command = CommandParser::parse(argc, argv);

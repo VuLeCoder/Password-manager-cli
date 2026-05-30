@@ -1,4 +1,4 @@
-#include "./../include/CommandParser.h"
+#include "./../../include/cli/CommandParser.h"
 
 Command CommandParser::parse(int argc, char* argv[]) {
     Command cmd;

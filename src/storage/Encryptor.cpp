@@ -1,5 +1,5 @@
-#include "./../include/Encryptor.h"
-#include "./../include/Security.h"
+#include "./../../include/storage/Encryptor.h"
+#include "./../../include/utils/Security.h"
 
 std::string Encryptor::encrypt(
     const std::string& data,

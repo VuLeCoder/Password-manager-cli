@@ -1,6 +1,6 @@
-#include "./../include/Vault.h"
-#include "./../include/Constants.h"
-#include "./../include/Security.h"
+#include "./../../include/core/Vault.h"
+#include "./../../include/utils/Constants.h"
+#include "./../../include/utils/Security.h"
 
 #include <filesystem>
 #include <fstream>

@@ -1,6 +1,6 @@
-#include "./../include/Constants.h"
-#include "./../include/PasswordManager.h"
-#include "./../include/Storage.h"
+#include "./../../include/core/PasswordManager.h"
+#include "./../../include/storage/Storage.h"
+#include "./../../include/utils/Constants.h"
 
 #include <iostream>
 #include <limits>

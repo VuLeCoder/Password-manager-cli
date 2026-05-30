@@ -1,5 +1,5 @@
-#include "./../include/AuthGuard.h"
-#include "./../include/SessionManager.h"
+#include "./../../include/core/AuthGuard.h"
+#include "./../../include/core/SessionManager.h"
 
 bool AuthGuard::verify() {
     return SessionManager::isValid();

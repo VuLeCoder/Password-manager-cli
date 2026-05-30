@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-class Account{
+class Account {
 private:
     std::string service;
     std::string username;
