@@ -19,5 +19,5 @@ private:
     Account* findAccount(const std::string& service);
     const Account* findAccount(const std::string& service) const;
     bool save();
-    Account PasswordManager::inputAccount(const std::string& service);
+    Account inputAccount(const std::string& service);
 };
