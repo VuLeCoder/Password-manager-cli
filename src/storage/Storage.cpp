@@ -17,6 +17,10 @@ static std::vector<std::string> split(const std::string& str, char delimiter) {
         result.push_back(item);
     }
 
+    if (!str.empty() && str.back() == delimiter) {
+        result.push_back("");
+    }
+
     return result;
 }
 
@@ -77,11 +81,47 @@ std::vector<Account> Storage::load(
         if(parts.size() == 3) {
             accounts.emplace_back(parts[0], parts[1], parts[2], "", "");
         } else if(parts.size() == 4) {
-            accounts.emplace_back(parts[0], parts[1], parts[2], "", parts[3]);
-        } else if(parts.size() == 5) {
+            accounts.emplace_back(parts[0], parts[1], parts[2], parts[3], "");
+        } else if(parts.size() >= 5) {
             accounts.emplace_back(parts[0], parts[1], parts[2], parts[3], parts[4]);
         }
     }
     
     return accounts;
+}
+
+bool Storage::saveCategories(
+    const std::vector<std::string>& categories,
+    const std::string& path
+) {
+    std::ofstream file(path);
+    if(!file.is_open()) return false;
+
+    std::string data = "";
+    for(const auto& cat : categories) {
+        data += cat + "\n";
+    }
+    file << Encryptor::encrypt(data, KEY);
+    file.close();
+    return true;
+}
+
+std::vector<std::string> Storage::loadCategories(
+    const std::string& path
+) {
+    std::vector<std::string> categories;
+    std::ifstream file(path);
+    if(!file.is_open()) return categories;
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    file.close();
+
+    std::string plaintext = Encryptor::decrypt(buffer.str(), KEY);
+    std::stringstream ss(plaintext);
+    std::string line;
+    while(std::getline(ss, line)) {
+        if(!line.empty()) categories.push_back(line);
+    }
+    return categories;
 }

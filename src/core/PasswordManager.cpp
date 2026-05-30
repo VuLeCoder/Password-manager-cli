@@ -40,7 +40,7 @@ bool PasswordManager::save() {
 Account PasswordManager::inputAccount(const std::string& service) {
     std::string username;
     std::string password;
-    std::string category;
+    std::string category = "";
     std::string note;
 
     std::cout << "Username: ";
@@ -49,8 +49,41 @@ Account PasswordManager::inputAccount(const std::string& service) {
     std::cout << "Password: ";
     std::getline(std::cin, password);
 
-    std::cout << "Category: ";
-    std::getline(std::cin, category);
+    if (categories.empty()) {
+        std::cout << "Category (Enter new): ";
+        std::getline(std::cin, category);
+        if (!category.empty()) {
+            addCategory(category);
+        }
+    } else {
+        std::cout << "Select Category:\n";
+        for (size_t i = 0; i < categories.size(); ++i) {
+            std::cout << "  " << i + 1 << ". " << categories[i] << "\n";
+        }
+        std::cout << "  0. [Enter New Category]\n";
+        std::cout << "Choice: ";
+        
+        std::string choiceStr;
+        std::getline(std::cin, choiceStr);
+        try {
+            int choice = std::stoi(choiceStr);
+            if (choice > 0 && choice <= (int)categories.size()) {
+                category = categories[choice - 1];
+            } else {
+                std::cout << "Enter new category: ";
+                std::getline(std::cin, category);
+                if (!category.empty()) {
+                    addCategory(category);
+                }
+            }
+        } catch (...) {
+            std::cout << "Enter new category: ";
+            std::getline(std::cin, category);
+            if (!category.empty()) {
+                addCategory(category);
+            }
+        }
+    }
 
     std::cout << "Note: ";
     std::getline(std::cin, note);
@@ -68,6 +101,39 @@ Account PasswordManager::inputAccount(const std::string& service) {
 // === === public === ===
 PasswordManager::PasswordManager() {
     accounts = Storage::load(Constants::VAULT_DB);
+    categories = Storage::loadCategories(Constants::CATEGORY_DB);
+}
+
+void PasswordManager::listCategories() const {
+    if (categories.empty()) {
+        std::cout << "No categories found.\n";
+        return;
+    }
+
+    std::cout << "--- Categories ---\n";
+    for (size_t i = 0; i < categories.size(); ++i) {
+        std::cout << i + 1 << ". " << categories[i] << "\n";
+    }
+}
+
+void PasswordManager::addCategory(const std::string& category) {
+    for (const auto& cat : categories) {
+        if (toLower(cat) == toLower(category)) {
+            std::cout << "Category '" << category << "' already exists.\n";
+            return;
+        }
+    }
+
+    categories.push_back(category);
+    if (saveCats()) {
+        std::cout << "Category '" << category << "' added.\n";
+    } else {
+        std::cout << "Failed to save category.\n";
+    }
+}
+
+bool PasswordManager::saveCats() {
+    return Storage::saveCategories(categories, Constants::CATEGORY_DB);
 }
 
 void PasswordManager::search(const std::string& query) const {
@@ -112,7 +178,7 @@ void PasswordManager::list(const std::string& categoryFilter) const
     std::vector<std::vector<std::string>> rows;
 
     for(const auto& account : accounts) {
-        if (!categoryFilter.empty() && account.getCategory() != categoryFilter) {
+        if (!categoryFilter.empty() && toLower(account.getCategory()) != toLower(categoryFilter)) {
             continue;
         }
 

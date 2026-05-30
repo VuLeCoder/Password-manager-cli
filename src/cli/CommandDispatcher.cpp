@@ -155,8 +155,12 @@ int CommandDispatcher::execute(const Command& cmd) {
         if(!requireUnlock()) return 0;
 
         PasswordManager lptv;
-        std::string category = cmd.args.empty() ? "" : cmd.args[0];
-        lptv.list(category);
+        if (!cmd.args.empty() && cmd.args[0] == "category") {
+            lptv.listCategories();
+        } else {
+            std::string category = cmd.args.empty() ? "" : cmd.args[0];
+            lptv.list(category);
+        }
         return 0;
     }
 
@@ -177,7 +181,15 @@ int CommandDispatcher::execute(const Command& cmd) {
         if(!requireService(cmd)) return 0;
 
         PasswordManager lptv;
-        lptv.add(cmd.args[0]);
+        if (cmd.args[0] == "category") {
+            if (cmd.args.size() < 2) {
+                std::cout << "Missing category name.\n";
+            } else {
+                lptv.addCategory(cmd.args[1]);
+            }
+        } else {
+            lptv.add(cmd.args[0]);
+        }
         return 0;
     }
 
