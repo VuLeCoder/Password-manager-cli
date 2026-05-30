@@ -1,14 +1,34 @@
+#include "./../include/Constants.h"
 #include "./../include/PasswordManager.h"
 #include "./../include/Storage.h"
+
 #include <iostream>
+#include <limits>
 
-constexpr const char* DB_PATH = "data/vault.db";
-
-PasswordManager::PasswordManager() {
-    accounts = Storage::load(DB_PATH);
+// === === private === ===
+Account* PasswordManager::findAccount(const std::string& service) {
+    for(auto& account : accounts) {
+        if(account.getService() == service) {
+            return &account;
+        }
+    }
+    return nullptr;
 }
 
-void PasswordManager::add(const std::string& service) {
+const Account* PasswordManager::findAccount(const std::string& service) const {
+    for(const auto& account : accounts) {
+        if(account.getService() == service) {
+            return &account;
+        }
+    }
+    return nullptr;
+}
+
+bool PasswordManager::save() {
+    return Storage::save(accounts, Constants::VAULT_DB);
+}
+
+Account PasswordManager::inputAccount(const std::string& service) {
     std::string username;
     std::string password;
     std::string note;
@@ -22,15 +42,18 @@ void PasswordManager::add(const std::string& service) {
     std::cout << "Note: ";
     std::getline(std::cin, note);
 
-    accounts.emplace_back(
+    return Account(
         service,
         username,
         password,
         note
     );
+}
 
-    Storage::save(accounts, DB_PATH);
-    std::cout << "Saved.\n";
+
+// === === public === ===
+PasswordManager::PasswordManager() {
+    accounts = Storage::load(Constants::VAULT_DB);
 }
 
 void PasswordManager::list() const
@@ -48,35 +71,68 @@ void PasswordManager::list() const
     }
 }
 
-void PasswordManager::get(const std::string& service) const {
-    for(const auto& account : accounts) {
-        if(account.getService() == service) {
-            
-            std::cout
-                << "Service : "
-                << account.getService()
-                << "\n";
+void PasswordManager::add(const std::string& service) {
+    Account* existsAcc = findAccount(service);
+    if(existsAcc != nullptr) {
+        std::cout
+            << "Service '"
+            << service
+            << "' already exists.\n";
+        
+        std::cout << "Do you want to update it? (y/n): "; 
+        char choice; 
+        std::cin >> choice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-            std::cout
-                << "Username: "
-                << account.getUsername()
-                << "\n";
-
-            std::cout
-                << "Password: "
-                << account.getPassword()
-                << "\n";
-
-            std::cout
-                << "Note    : "
-                << account.getNote()
-                << "\n";
-
+        if(choice != 'y' && choice != 'Y') {
+            std::cout << "Command cancelled.\n";
             return;
         }
+        
+        update(service);
+        return;
+    }
+    
+    Account acc = inputAccount(service);
+    accounts.emplace_back(acc);
+
+    if(save()) {
+        std::cout << "Account saved.\n";
+        return;
+    }
+    std::cout << "Failed to save account\n";
+}
+
+void PasswordManager::update(const std::string& service) {
+    Account* existsAcc = findAccount(service);
+    if(existsAcc == nullptr) {
+        std::cout << "Account not found.\n";
+        return;
     }
 
-    std::cout << "Account not found.\n";
+    Account acc = inputAccount(service);
+    existsAcc->setUsername(acc.getUsername());
+    existsAcc->setPassword(acc.getPassword());
+    existsAcc->setNote(acc.getNote());
+
+    if(save()) {
+        std::cout << "Account updated.\n";
+        return;
+    }
+    std::cout << "Failed to update account\n";
+}
+
+void PasswordManager::get(const std::string& service) const {
+    const Account* account = findAccount(service);
+    if(account == nullptr) {
+        std::cout << "Account not found.\n";
+        return;
+    }
+
+    std::cout << "Service : " << account->getService() << "\n";
+    std::cout << "Username: " << account->getUsername() << "\n";
+    std::cout << "Password: " << account->getPassword() << "\n";
+    std::cout << "Note    : " << account->getNote() << "\n";
 }
 
 void PasswordManager::remove(const std::string& service) {
@@ -88,12 +144,11 @@ void PasswordManager::remove(const std::string& service) {
         if(it->getService() == service) {
             accounts.erase(it);
 
-            Storage::save(
-                accounts,
-                DB_PATH
-            );
-
-            std::cout << "Deleted.\n";
+            if(save()) {
+                std::cout << "Account deleted.\n";
+                return;
+            }
+            std::cout << "Failed to delete account\n";
             return;
         }
     }

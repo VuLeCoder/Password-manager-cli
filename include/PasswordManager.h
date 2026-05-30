@@ -9,8 +9,15 @@ private:
 public:
     PasswordManager();
 
-    void add(const std::string& service);
     void list() const;
+    void add(const std::string& service);
+    void update(const std::string& service);
     void get(const std::string& service) const;
     void remove(const std::string& service);
+
+private:
+    Account* findAccount(const std::string& service);
+    const Account* findAccount(const std::string& service) const;
+    bool save();
+    Account PasswordManager::inputAccount(const std::string& service);
 };
