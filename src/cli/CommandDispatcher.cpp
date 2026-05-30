@@ -1,5 +1,6 @@
 #include "./../../include/cli/CommandDispatcher.h"
 #include "./../../include/cli/Console.h"
+#include "./../../include/cli/CommandParser.h"
 
 #include "./../../include/core/AuthGuard.h"
 #include "./../../include/core/PasswordManager.h"
@@ -30,16 +31,37 @@ bool CommandDispatcher::requireService(const Command& cmd) {
 int CommandDispatcher::execute(const Command& cmd) {
     if(cmd.name == "help") {
         std::cout
-            << "lptv init\n"
-            << "lptv unlock\n"
-            << "lptv lock\n"
-            << "lptv status\n"
-            << "lptv list\n"
-            << "lptv add <service>\n"
-            << "lptv update <service>\n"
-            << "lptv get <service>\n"
-            << "lptv delete <service>\n";
+            << "lptv init            - Initialize the vault\n"
+            << "lptv unlock          - Unlock the vault\n"
+            << "lptv lock            - Lock the vault\n"
+            << "lptv status          - Check vault status\n"
+            << "lptv shell           - Enter interactive mode\n"
+            << "lptv list            - List all services\n"
+            << "lptv add <svc>       - Add a new account\n"
+            << "lptv update <svc>    - Update an account\n"
+            << "lptv get <svc>       - Get account details\n"
+            << "lptv delete <svc>    - Delete an account\n";
 
+        return 0;
+    }
+
+    if(cmd.name == "shell") {
+        std::cout << "--- Interactive Mode (type 'exit' or 'quit' to leave) ---\n";
+        std::string input;
+        while (true) {
+            std::cout << "lptv> ";
+            if (!std::getline(std::cin, input)) break;
+            if (input == "exit" || input == "quit") break;
+            if (input.empty()) continue;
+
+            Command innerCmd = CommandParser::parse(input);
+            if (innerCmd.name == "shell") {
+                std::cout << "Already in interactive mode.\n";
+                continue;
+            }
+            execute(innerCmd);
+        }
+        std::cout << "Exiting interactive mode.\n";
         return 0;
     }
 
