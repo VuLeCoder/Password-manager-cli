@@ -15,6 +15,7 @@ public:
     void search(const std::string& query) const;
     void add(const std::string& service);
     void addCategory(const std::string& category);
+    void removeCategory(const std::string& category);
     void update(const std::string& service);
     void get(const std::string& service) const;
     void remove(const std::string& service);

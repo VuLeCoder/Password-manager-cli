@@ -132,6 +132,23 @@ void PasswordManager::addCategory(const std::string& category) {
     }
 }
 
+void PasswordManager::removeCategory(const std::string& category) {
+    auto it = std::find_if(categories.begin(), categories.end(), [&](const std::string& cat) {
+        return toLower(cat) == toLower(category);
+    });
+
+    if (it != categories.end()) {
+        categories.erase(it);
+        if (saveCats()) {
+            std::cout << "Category '" << category << "' removed.\n";
+        } else {
+            std::cout << "Failed to save categories.\n";
+        }
+    } else {
+        std::cout << "Category '" << category << "' not found.\n";
+    }
+}
+
 bool PasswordManager::saveCats() {
     return Storage::saveCategories(categories, Constants::CATEGORY_DB);
 }
