@@ -4,10 +4,7 @@
 #include <sstream>
 #include <filesystem>
 
-static std::vector<std::string> split(
-    const std::string& str,
-    char delimiter
-) {
+static std::vector<std::string> split(const std::string& str, char delimiter) {
     std::vector<std::string> result;
 
     std::stringstream ss(str);
@@ -24,7 +21,10 @@ bool Storage::save(
     const std::vector<Account>& accounts,
     const std::string& path
 ) {
-    std::filesystem::create_directories("data");
+    std::filesystem::path p(path);
+    if(p.has_parent_path()) {
+        std::filesystem::create_directories(p.parent_path());
+    }
     
     std::ofstream file(path);
     if(!file.is_open()) {
@@ -56,6 +56,8 @@ std::vector<Account> Storage::load(
 
     std::string line;
     while(std::getline(file, line)) {
+        if(line.empty()) continue;
+
         auto parts = split(line, '|');
         if(parts.size() != 4) continue;
 
