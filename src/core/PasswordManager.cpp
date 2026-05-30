@@ -139,6 +139,19 @@ void PasswordManager::get(const std::string& service) const {
     std::cout << "Username: " << account->getUsername() << "\n";
     std::cout << "Password: " << account->getPassword() << "\n";
     std::cout << "Note    : " << account->getNote() << "\n";
+
+    std::cout << "\nCopy password to clipboard? (y/n): ";
+    char choice;
+    std::cin >> choice;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    if (choice == 'y' || choice == 'Y') {
+        if (Console::copyToClipboard(account->getPassword())) {
+            std::cout << "Password copied to clipboard!\n";
+        } else {
+            std::cout << "Failed to copy password.\n";
+        }
+    }
 }
 
 void PasswordManager::remove(const std::string& service) {

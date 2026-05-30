@@ -4,6 +4,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iomanip>
+#include <cstdio>
 
 std::string Console::getHiddenInput() {
     std::string input;
@@ -73,4 +74,13 @@ void Console::printTable(
         std::cout << "|" << std::endl;
     }
     printSeparator();
+}
+
+bool Console::copyToClipboard(const std::string& text) {
+    FILE* pipe = _popen("clip", "w");
+    if (!pipe) return false;
+
+    fprintf(pipe, "%s", text.c_str());
+    _pclose(pipe);
+    return true;
 }
