@@ -18,10 +18,10 @@ public:
         const std::string& note
     );
 
-    std::string getService() const;
-    std::string getUsername() const;
-    std::string getPassword() const;
-    std::string getNote() const;
+    const std::string& getService() const;
+    const std::string& getUsername() const;
+    const std::string& getPassword() const;
+    const std::string& getNote() const;
 
     void setService(const std::string& service);
     void setUsername(const std::string& username);

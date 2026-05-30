@@ -12,10 +12,10 @@ Account::Account(
     this->note = note;
 }
 
-std::string Account::getService() const    { return service; }
-std::string Account::getUsername() const   { return username; }
-std::string Account::getPassword() const   { return password; }
-std::string Account::getNote() const       { return note; }
+const std::string& Account::getService() const    { return service; }
+const std::string& Account::getUsername() const   { return username; }
+const std::string& Account::getPassword() const   { return password; }
+const std::string& Account::getNote() const       { return note; }
 
 void Account::setService(const std::string& service)    { this->service = service; }
 void Account::setUsername(const std::string& username)  { this->username = username; }
