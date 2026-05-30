@@ -1,8 +1,9 @@
 #include "./../include/Vault.h"
 #include "./../include/Constants.h"
+#include "./../include/Security.h"
 
-#include "filesystem"
-#include "fstream"
+#include <filesystem>
+#include <fstream>
 
 bool Vault::exists() {
     return std::filesystem::exists(
@@ -43,3 +44,21 @@ bool Vault::initialize() {
     return true;
 }
 
+bool Vault::hasLPTVPassword() {
+    std::ifstream file(Constants::MASTER_FILE);
+    return file.peek() != EOF;
+}
+
+void Vault::setLPTVPassword(const std::string& password) {
+    std::ofstream file(Constants::MASTER_FILE);
+    file << Sercurity::hash(password);
+}
+
+bool Vault::verifyLPTV(const std::string& password) {
+    std::ifstream file(Constants::MASTER_FILE);
+
+    std::string savedHash;
+    std::getline(file, savedHash);
+
+    return savedHash == Sercurity::hash(password);
+}
