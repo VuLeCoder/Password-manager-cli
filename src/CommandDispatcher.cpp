@@ -1,7 +1,8 @@
 #include "./../include/AuthGuard.h"
-#include "../include/CommandDispatcher.h"
-#include "../include/Vault.h"
-#include "../include/PasswordManager.h"
+#include "./../include/CommandDispatcher.h"
+#include "./../include/Vault.h"
+#include "./../include/PasswordManager.h"
+#include "./../include/Console.h"
 
 #include <iostream>
 
@@ -47,12 +48,11 @@ int CommandDispatcher::execute(const Command& cmd) {
             return 0;
         }
 
-        std::string password, confirm;
         std::cout << "Create lptv password: ";
-        std::getline(std::cin, password);
+        std::string password = Console::getHiddenInput();
 
         std::cout << "Confirm lptv password: ";
-        std::getline(std::cin, confirm);
+        std::string confirm = Console::getHiddenInput();
 
         if(password.empty()) {
             std::cout << "Password cannot be empty!\n";
@@ -102,9 +102,8 @@ int CommandDispatcher::execute(const Command& cmd) {
             return 0;
         }
 
-        std::string password;
         std::cout << "Enter password: ";
-        std::getline(std::cin, password);
+        std::string password = Console::getHiddenInput();        
 
         if(Vault::verifyLPTV(password)) {
             AuthGuard::unlock();
