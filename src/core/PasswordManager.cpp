@@ -1,6 +1,7 @@
 #include "./../../include/core/PasswordManager.h"
 #include "./../../include/storage/Storage.h"
 #include "./../../include/utils/Constants.h"
+#include "./../../include/cli/Console.h"
 
 #include <iostream>
 #include <limits>
@@ -63,12 +64,17 @@ void PasswordManager::list() const
         return;
     }
 
+    std::vector<std::string> headers = {"Service", "Username"};
+    std::vector<std::vector<std::string>> rows;
+
     for(const auto& account : accounts) {
-        std::cout
-            << "- "
-            << account.getService()
-            << "\n";
+        rows.push_back({
+            account.getService(),
+            account.getUsername()
+        });
     }
+
+    Console::printTable(headers, rows);
 }
 
 void PasswordManager::add(const std::string& service) {
