@@ -7,4 +7,6 @@ namespace Constants {
     inline const std::string MASTER_FILE = ".lptv/lptv.dat";
     inline const std::string CONFIG_FILE = ".lptv/config.json";
     inline const std::string SESSION_FILE = ".lptv/session.dat";
+
+    inline constexpr int SESSION_TIMEOUT = 1800;
 }

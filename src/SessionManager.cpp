@@ -27,7 +27,7 @@ bool SessionManager::isValid() {
 }
 
 void SessionManager::create() {
-    auto expire = time(nullptr) + 1800;
+    auto expire = time(nullptr) + Constants::SESSION_TIMEOUT;
     std::ofstream file(Constants::SESSION_FILE);
     file << expire;
     file.close();
