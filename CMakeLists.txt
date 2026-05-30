@@ -1,0 +1,57 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(PasswordManager)
+
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Source files
+set(SOURCES
+    src/main.cpp
+
+    src/cli/CommandDispatcher.cpp
+    src/cli/CommandParser.cpp
+    src/cli/Console.cpp
+
+    src/core/Account.cpp
+    src/core/AuthGuard.cpp
+    src/core/PasswordManager.cpp
+    src/core/SessionManager.cpp
+    src/core/Vault.cpp
+
+    src/storage/Encryptor.cpp
+    src/storage/Storage.cpp
+
+    src/utils/Security.cpp
+)
+
+# Header files (optional, but helpful for IDEs)
+set(HEADERS
+    include/cli/Command.h
+    include/cli/CommandDispatcher.h
+    include/cli/CommandParser.h
+    include/cli/Console.h
+
+    include/core/Account.h
+    include/core/AuthGuard.h
+    include/core/PasswordManager.h
+    include/core/SessionManager.h
+    include/core/Vault.h
+
+    include/storage/Encryptor.h
+    include/storage/Storage.h
+
+    include/utils/Constants.h
+    include/utils/Security.h
+)
+
+# Create executable
+add_executable(password-manager ${SOURCES} ${HEADERS})
+
+# Include directories
+target_include_directories(password-manager PRIVATE include)
+
+set_target_properties(password-manager PROPERTIES
+    OUTPUT_NAME "lptv"
+)
