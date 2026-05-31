@@ -4,7 +4,9 @@ Một ứng dụng quản lý mật khẩu dòng lệnh (CLI) mạnh mẽ, bảo
 
 ## 🌟 Tính năng chính
 
-- **Bảo mật tốt:** Sử dụng thuật toán băm **Argon2** (thắng giải Password Hashing Competition) để bảo vệ Master Password.
+- **Bảo mật tốt:** Sử dụng các thuật toán
+    - **Argon2** để bảo vệ Master Password
+    - **AES-256-GCM** để bảo vệ dữ liệu người dùng.
 - **Cơ chế Session:** Tự động khóa vault sau 5 phút không hoạt động để đảm bảo an toàn.
 - **Quản lý linh hoạt:**
     - Lưu trữ tài khoản theo Service (tên dịch vụ).
@@ -19,6 +21,7 @@ Một ứng dụng quản lý mật khẩu dòng lệnh (CLI) mạnh mẽ, bảo
 - **Hệ điều hành:** Windows (win32)
 - **Thư viện:**
     - [Argon2](https://github.com/P-H-C/phc-winner-argon2): Băm và xác thực mật khẩu.
+    - [OpenSSL](https://www.openssl.org/): Cung cấp các thuật toán mã hóa AES-256-GCM và trình tạo số ngẫu nhiên an toàn.
     - [nlohmann/json](https://github.com/nlohmann/json): Xử lý định dạng dữ liệu JSON.
 - **Build System:** CMake
 
@@ -27,7 +30,9 @@ Một ứng dụng quản lý mật khẩu dòng lệnh (CLI) mạnh mẽ, bảo
 ### Yêu cầu hệ thống
 - Trình biên dịch hỗ trợ C++17 (MSVC, GCC, hoặc Clang).
 - CMake 3.10 trở lên.
-- Thư viện `libargon2` đã được cài đặt trên hệ thống.
+- Thư viện `libargon2`
+- Thư viện `OpenSSL`
+- Thư viện `nlohmann/json`
 
 ### Hướng dẫn Build
 ```bash
@@ -59,6 +64,10 @@ Sau khi biên dịch thành công, bạn sẽ nhận được tệp thực thi `
 | `lptv search` | Tìm kiếm tài khoản theo từ khóa. |
 | `lptv shell` | Vào chế độ Interactive Shell (không cần gõ tiền tố `lptv`). |
 
+> **Lưu ý:**
+> - **Chế độ độc lập (Standalone):** Khi chạy các lệnh như `list`, `add`, `get`,... nếu Vault đang khóa, ứng dụng sẽ **tự động yêu cầu nhập mật khẩu** để thực thi lệnh ngay lập tức.
+> - **Chế độ Shell:** Trong `lptv shell`, bạn cần dùng lệnh `unlock` để mở khóa một lần và sử dụng cho cả phiên làm việc.
+
 *Dùng `lptv help <command>` để xem hướng dẫn chi tiết cho từng lệnh.*
 
 ## 📂 Cấu trúc thư mục
@@ -68,8 +77,8 @@ Sau khi biên dịch thành công, bạn sẽ nhận được tệp thực thi `
 ├── include/            # Các tệp tiêu đề (.h)
 │   ├── cli/            # Xử lý giao diện dòng lệnh và parser
 │   ├── core/           # Logic nghiệp vụ chính (Vault, Session, Manager)
-│   ├── storage/        # Xử lý lưu trữ và mã hóa dữ liệu
-│   └── utils/          # Các tiện ích bổ trợ (Security, Constants)
+│   ├── storage/        # Xử lý lưu trữ
+│   └── utils/          # Các tiện ích bổ trợ (Security, Constants) và mã hóa dữ liệu
 ├── src/                # Các tệp thực thi (.cpp)
 ├── build/              # Thư mục chứa tệp sau khi biên dịch
 └── CMakeLists.txt      # Cấu hình build project
@@ -77,9 +86,24 @@ Sau khi biên dịch thành công, bạn sẽ nhận được tệp thực thi `
 
 ## 🔐 Cơ chế bảo mật
 
-1. **Master Password:** Không được lưu trực tiếp. Chỉ lưu giá trị băm (hash) sử dụng Argon2 với muối (salt) ngẫu nhiên.
-2. **Vault Data:** Dữ liệu tài khoản được lưu trữ trong `vault.db`.
-3. **Session Management:** Khi `unlock`, một tệp session tạm thời được tạo ra với timestamp. Các lệnh yêu cầu quyền truy cập sẽ kiểm tra tính hợp lệ của session này.
+Ứng dụng được thiết kế với các tiêu chuẩn bảo mật hiện đại để bảo vệ dữ liệu của bạn:
 
----
-*Dự án đang trong quá trình phát triển, cụ thể là dữ liệu tài khoản người dùng đang lưu bản rõ.*
+1. **Mã hóa dữ liệu (Encryption):**
+   - Sử dụng thuật toán **AES-256-GCM** (Galois/Counter Mode), tiêu chuẩn mã hóa đối xứng mạnh nhất hiện nay.
+   - Cơ chế GCM không chỉ mã hóa dữ liệu mà còn đảm bảo tính toàn vẹn (Integrity), giúp phát hiện bất kỳ sự thay đổi trái phép nào trên tệp dữ liệu.
+   - Mỗi lần lưu dữ liệu, một **Nonce (Initialization Vector)** ngẫu nhiên 12-byte và một **Auth Tag** 16-byte được tạo ra để đảm bảo tính duy nhất.
+
+2. **Dẫn xuất khóa (Key Derivation):**
+   - Master Password không được dùng trực tiếp làm khóa mã hóa.
+   - Sử dụng **Argon2id** (phiên bản chống lại các cuộc tấn công side-channel và tối ưu cho GPU/ASIC) để tạo ra khóa 256-bit từ mật khẩu của bạn.
+   - Thông tin xác thực mật khẩu được lưu dưới dạng băm **SHA-256** kèm theo muối (salt) ngẫu nhiên trong `.lptv/lptv.dat`.
+
+3. **Quản lý phiên (Session Management):**
+   - **Xác thực 2 lớp:** Hệ thống kiểm tra cả tệp timestamp trên đĩa (`session.dat`) và khóa phiên trong bộ nhớ để cấp quyền.
+   - **Tự động hết hạn:** Phiên làm việc (Session) sẽ tự động vô hiệu hóa sau **300 giây (5 phút)** không hoạt động.
+   - **Xóa sạch bộ nhớ:** Các dữ liệu nhạy cảm (như Master Password khi nhập) được xóa khỏi RAM ngay sau khi sử dụng để tránh tấn công memory dumping.
+
+4. **Lưu trữ an toàn:**
+   - Mọi dữ liệu nhạy cảm được lưu trong thư mục ẩn `.lptv/`.
+   - Cơ sở dữ liệu `vault.db` luôn được mã hóa hoàn toàn, chỉ giải mã khi có Master Password đúng.
+
