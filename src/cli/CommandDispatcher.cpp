@@ -8,14 +8,31 @@
 
 #include <iostream>
 
+bool CommandDispatcher::m_isShellMode = false;
+
 // === === private === ===
 bool CommandDispatcher::requireUnlock() {
-    if(!AuthGuard::verify()) {
+    if(AuthGuard::verify()) {
+        return true;
+    }
+
+    if (m_isShellMode) {
         Console::printError("Vault is locked.");
         std::cout << "Run: " << Console::BOLD << "lptv unlock" << Console::RESET << "\n\n";
         return false;
+    } else {
+        std::cout << "Vault is locked. Enter password: ";
+        std::string password = Console::getHiddenInput();
+        
+        std::pair<bool, std::array<uint8_t, 32>> res = Vault::verifyLPTV(password);
+        if(res.first) {
+            AuthGuard::unlock(res.second);
+            return true;
+        }
+
+        Console::printError("Invalid password.");
+        return false;
     }
-    return true;
 }
 
 bool CommandDispatcher::requireService(const Command& cmd) {
@@ -106,6 +123,7 @@ int CommandDispatcher::execute(const Command& cmd) {
     }
 
     if(cmd.name == "shell") {
+        m_isShellMode = true;
         Console::printHeader("Entering Interactive Mode");
         std::cout << Console::GREY << "(type 'exit' or 'quit' to leave)" << Console::RESET << "\n\n";
         std::string input;
@@ -122,6 +140,7 @@ int CommandDispatcher::execute(const Command& cmd) {
             }
             execute(innerCmd);
         }
+        m_isShellMode = false;
         Console::printInfo("Exiting interactive mode.");
         return 0;
     }
