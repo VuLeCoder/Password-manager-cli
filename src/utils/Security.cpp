@@ -5,8 +5,36 @@
 #include <iomanip>
 #include <argon2.h>
 #include <random>
+#include <openssl/evp.h>
 
 // === === public === ===
+std::array<uint8_t, 32> Security::sha256(
+    const uint8_t* data,
+    size_t len
+) {
+    std::array<uint8_t, 32> hash{};
+
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    if (!ctx) return hash;
+
+    do {
+        if (EVP_DigestInit_ex(ctx, EVP_sha256(), nullptr) != 1)
+            break;
+
+        if (EVP_DigestUpdate(ctx, data, len) != 1)
+            break;
+
+        unsigned int outLen = 0;
+
+        if (EVP_DigestFinal_ex(ctx, hash.data(), &outLen) != 1)
+            break;
+
+    } while (false);
+
+    EVP_MD_CTX_free(ctx);
+    return hash;
+}
+
 std::vector<uint8_t> Security::generateSalt(size_t length) {
     std::random_device rd;
     std::vector<uint8_t> salt(length);

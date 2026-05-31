@@ -1,4 +1,5 @@
 #include "./../../include/core/SessionManager.h"
+#include "./../../include/core/SessionContext.h"
 #include "./../../include/utils/Constants.h"
 
 #include <time.h>
@@ -35,4 +36,5 @@ void SessionManager::create() {
 
 void SessionManager::destroy() {
     std::filesystem::remove(Constants::SESSION_FILE);
+    SessionContext::get().clear();
 }

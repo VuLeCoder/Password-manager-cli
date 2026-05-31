@@ -11,6 +11,11 @@ private:
     inline constexpr static int V3 = 1;
 
 public:
+    static std::array<uint8_t, 32> sha256(
+        const uint8_t* data,
+        size_t len
+    );
+
     static std::vector<uint8_t> generateSalt(size_t length = 16);
 
     static std::array<uint8_t, 32> deriveKey(

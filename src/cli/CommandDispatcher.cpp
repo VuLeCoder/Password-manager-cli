@@ -176,8 +176,9 @@ int CommandDispatcher::execute(const Command& cmd) {
         std::cout << "Enter password: ";
         std::string password = Console::getHiddenInput();        
 
-        if(Vault::verifyLPTV(password)) {
-            AuthGuard::unlock();
+        std::pair<bool, std::array<uint8_t, 32>> res = Vault::verifyLPTV(password);
+        if(res.first) {
+            AuthGuard::unlock(res.second);
             Console::printSuccess("Password vault unlocked.");
             return 0;
         }

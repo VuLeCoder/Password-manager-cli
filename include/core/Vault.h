@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+#include <cstdint>
+#include <array>
+#include <utility>
 
 class Vault{
 public:
@@ -8,5 +11,5 @@ public:
 
     static bool hasLPTVPassword();
     static void setLPTVPassword(const std::string& password);
-    static bool verifyLPTV(const std::string& password);
+    static std::pair<bool, std::array<uint8_t, 32>> verifyLPTV(const std::string& password);
 };

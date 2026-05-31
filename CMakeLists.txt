@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(ARGON2 REQUIRED libargon2)
+pkg_check_modules(OPENSSL REQUIRED openssl)
 
 # Source files
 set(SOURCES
@@ -20,12 +21,13 @@ set(SOURCES
     src/core/Account.cpp
     src/core/AuthGuard.cpp
     src/core/PasswordManager.cpp
+    src/core/SessionContext.cpp
     src/core/SessionManager.cpp
     src/core/Vault.cpp
 
-    src/storage/Encryptor.cpp
     src/storage/Storage.cpp
-
+    
+    src/utils/Encryptor.cpp
     src/utils/Security.cpp
 )
 
@@ -40,12 +42,13 @@ set(HEADERS
     include/core/AuthGuard.h
     include/core/PasswordManager.h
     include/core/SessionManager.h
+    include/core/SessionContext.h
     include/core/Vault.h
 
-    include/storage/Encryptor.h
     include/storage/Storage.h
-
+    
     include/utils/Constants.h
+    include/utils/Encryptor.h
     include/utils/Security.h
 )
 
@@ -58,18 +61,21 @@ target_include_directories(
     PRIVATE 
     include
     ${ARGON2_INCLUDE_DIRS}
+    ${OPENSSL_INCLUDE_DIRS}
 )
 
 target_link_directories(
     password-manager
     PRIVATE
     ${ARGON2_LIBRARY_DIRS}
+    ${OPENSSL_LIBRARY_DIRS}
 )
 
 target_link_libraries(
     password-manager
     PRIVATE
     ${ARGON2_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
 )
 
 set_target_properties(password-manager PROPERTIES
