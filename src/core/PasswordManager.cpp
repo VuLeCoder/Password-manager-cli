@@ -43,25 +43,25 @@ Account PasswordManager::inputAccount(const std::string& service) {
     std::string category = "";
     std::string note;
 
-    std::cout << "Username: ";
+    std::cout << Console::BOLD << "  Username " << Console::RESET << ": ";
     std::getline(std::cin, username);
 
-    std::cout << "Password: ";
+    std::cout << Console::BOLD << "  Password " << Console::RESET << ": ";
     std::getline(std::cin, password);
 
     if (categories.empty()) {
-        std::cout << "Category (Enter new): ";
+        std::cout << Console::BOLD << "  Category " << Console::RESET << "(Enter new): ";
         std::getline(std::cin, category);
         if (!category.empty()) {
             addCategory(category);
         }
     } else {
-        std::cout << "Select Category:\n";
+        std::cout << Console::BOLD << "  Select Category" << Console::RESET << ":\n";
         for (size_t i = 0; i < categories.size(); ++i) {
-            std::cout << "  " << i + 1 << ". " << categories[i] << "\n";
+            std::cout << "    " << Console::CYAN << i + 1 << ". " << Console::RESET << categories[i] << "\n";
         }
-        std::cout << "  0. [Enter New Category]\n";
-        std::cout << "Choice: ";
+        std::cout << "    " << Console::CYAN << "0. " << Console::RESET << "[Enter New Category]\n";
+        std::cout << "  " << Console::BOLD << "Choice" << Console::RESET << ": ";
         
         std::string choiceStr;
         std::getline(std::cin, choiceStr);
@@ -70,14 +70,14 @@ Account PasswordManager::inputAccount(const std::string& service) {
             if (choice > 0 && choice <= (int)categories.size()) {
                 category = categories[choice - 1];
             } else {
-                std::cout << "Enter new category: ";
+                std::cout << "  " << Console::BOLD << "Enter new category" << Console::RESET << ": ";
                 std::getline(std::cin, category);
                 if (!category.empty()) {
                     addCategory(category);
                 }
             }
         } catch (...) {
-            std::cout << "Enter new category: ";
+            std::cout << "  " << Console::BOLD << "Enter new category" << Console::RESET << ": ";
             std::getline(std::cin, category);
             if (!category.empty()) {
                 addCategory(category);
@@ -85,7 +85,7 @@ Account PasswordManager::inputAccount(const std::string& service) {
         }
     }
 
-    std::cout << "Note: ";
+    std::cout << Console::BOLD << "  Note     " << Console::RESET << ": ";
     std::getline(std::cin, note);
 
     return Account(
@@ -106,29 +106,30 @@ PasswordManager::PasswordManager() {
 
 void PasswordManager::listCategories() const {
     if (categories.empty()) {
-        std::cout << "No categories found.\n";
+        Console::printInfo("No categories found.");
         return;
     }
 
-    std::cout << "--- Categories ---\n";
+    Console::printHeader("Categories");
     for (size_t i = 0; i < categories.size(); ++i) {
-        std::cout << i + 1 << ". " << categories[i] << "\n";
+        std::cout << "  " << Console::CYAN << i + 1 << ". " << Console::RESET << categories[i] << "\n";
     }
+    std::cout << std::endl;
 }
 
 void PasswordManager::addCategory(const std::string& category) {
     for (const auto& cat : categories) {
         if (toLower(cat) == toLower(category)) {
-            std::cout << "Category '" << category << "' already exists.\n";
+            Console::printWarning("Category '" + category + "' already exists.");
             return;
         }
     }
 
     categories.push_back(category);
     if (saveCats()) {
-        std::cout << "Category '" << category << "' added.\n";
+        Console::printSuccess("Category '" + category + "' added.");
     } else {
-        std::cout << "Failed to save category.\n";
+        Console::printError("Failed to save category.");
     }
 }
 
@@ -140,12 +141,12 @@ void PasswordManager::removeCategory(const std::string& category) {
     if (it != categories.end()) {
         categories.erase(it);
         if (saveCats()) {
-            std::cout << "Category '" << category << "' removed.\n";
+            Console::printSuccess("Category '" + category + "' removed.");
         } else {
-            std::cout << "Failed to save categories.\n";
+            Console::printError("Failed to save categories.");
         }
     } else {
-        std::cout << "Category '" << category << "' not found.\n";
+        Console::printError("Category '" + category + "' not found.");
     }
 }
 
@@ -155,7 +156,7 @@ bool PasswordManager::saveCats() {
 
 void PasswordManager::search(const std::string& query) const {
     if (accounts.empty()) {
-        std::cout << "No accounts.\n";
+        Console::printInfo("No accounts found.");
         return;
     }
 
@@ -177,7 +178,7 @@ void PasswordManager::search(const std::string& query) const {
     }
 
     if (rows.empty()) {
-        std::cout << "No matches found for '" << query << "'.\n";
+        Console::printInfo("No matches found for '" + query + "'.");
         return;
     }
 
@@ -187,7 +188,7 @@ void PasswordManager::search(const std::string& query) const {
 void PasswordManager::list(const std::string& categoryFilter) const
 {
     if(accounts.empty()) {
-        std::cout << "No accounts.\n";
+        Console::printInfo("No accounts found.");
         return;
     }
 
@@ -208,9 +209,9 @@ void PasswordManager::list(const std::string& categoryFilter) const
 
     if (rows.empty()) {
         if (!categoryFilter.empty()) {
-            std::cout << "No accounts in category '" << categoryFilter << "'.\n";
+            Console::printInfo("No accounts in category '" + categoryFilter + "'.");
         } else {
-            std::cout << "No accounts.\n";
+            Console::printInfo("No accounts found.");
         }
         return;
     }
@@ -221,10 +222,7 @@ void PasswordManager::list(const std::string& categoryFilter) const
 void PasswordManager::add(const std::string& service) {
     Account* existsAcc = findAccount(service);
     if(existsAcc != nullptr) {
-        std::cout
-            << "Service '"
-            << service
-            << "' already exists.\n";
+        Console::printWarning("Service '" + service + "' already exists.");
         
         std::cout << "Do you want to update it? (y/n): "; 
         char choice; 
@@ -232,7 +230,7 @@ void PasswordManager::add(const std::string& service) {
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         if(choice != 'y' && choice != 'Y') {
-            std::cout << "Command cancelled.\n";
+            Console::printInfo("Command cancelled.");
             return;
         }
         
@@ -244,16 +242,16 @@ void PasswordManager::add(const std::string& service) {
     accounts.emplace_back(acc);
 
     if(save()) {
-        std::cout << "Account saved.\n";
+        Console::printSuccess("Account saved.");
         return;
     }
-    std::cout << "Failed to save account\n";
+    Console::printError("Failed to save account.");
 }
 
 void PasswordManager::update(const std::string& service) {
     Account* existsAcc = findAccount(service);
     if(existsAcc == nullptr) {
-        std::cout << "Account not found.\n";
+        Console::printError("Account not found.");
         return;
     }
 
@@ -264,24 +262,25 @@ void PasswordManager::update(const std::string& service) {
     existsAcc->setNote(acc.getNote());
 
     if(save()) {
-        std::cout << "Account updated.\n";
+        Console::printSuccess("Account updated.");
         return;
     }
-    std::cout << "Failed to update account\n";
+    Console::printError("Failed to update account.");
 }
 
 void PasswordManager::get(const std::string& service) const {
     const Account* account = findAccount(service);
     if(account == nullptr) {
-        std::cout << "Account not found.\n";
+        Console::printError("Account not found.");
         return;
     }
 
-    std::cout << "Service : " << account->getService() << "\n";
-    std::cout << "Username: " << account->getUsername() << "\n";
-    std::cout << "Password: " << account->getPassword() << "\n";
-    std::cout << "Category: " << account->getCategory() << "\n";
-    std::cout << "Note    : " << account->getNote() << "\n";
+    Console::printHeader("Account Details: " + account->getService());
+    std::cout << "  " << Console::BOLD << "Service " << Console::RESET << " : " << account->getService() << "\n";
+    std::cout << "  " << Console::BOLD << "Username" << Console::RESET << " : " << account->getUsername() << "\n";
+    std::cout << "  " << Console::BOLD << "Password" << Console::RESET << " : " << account->getPassword() << "\n";
+    std::cout << "  " << Console::BOLD << "Category" << Console::RESET << " : " << account->getCategory() << "\n";
+    std::cout << "  " << Console::BOLD << "Note    " << Console::RESET << " : " << account->getNote() << "\n";
 
     std::cout << "\nCopy password to clipboard? (y/n): ";
     char choice;
@@ -290,9 +289,9 @@ void PasswordManager::get(const std::string& service) const {
 
     if (choice == 'y' || choice == 'Y') {
         if (Console::copyToClipboard(account->getPassword())) {
-            std::cout << "Password copied to clipboard!\n";
+            Console::printSuccess("Password copied to clipboard!");
         } else {
-            std::cout << "Failed to copy password.\n";
+            Console::printError("Failed to copy password.");
         }
     }
 }
@@ -307,13 +306,13 @@ void PasswordManager::remove(const std::string& service) {
             accounts.erase(it);
 
             if(save()) {
-                std::cout << "Account deleted.\n";
+                Console::printSuccess("Account deleted.");
                 return;
             }
-            std::cout << "Failed to delete account\n";
+            Console::printError("Failed to delete account.");
             return;
         }
     }
 
-    std::cout << "Account not found.\n";
+    Console::printError("Account not found.");
 }

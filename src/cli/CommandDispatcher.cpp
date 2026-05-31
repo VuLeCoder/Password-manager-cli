@@ -11,9 +11,8 @@
 // === === private === ===
 bool CommandDispatcher::requireUnlock() {
     if(!AuthGuard::verify()) {
-        std::cout
-            << "Vault is locked.\n"
-            << "Run: lptv unlock\n";
+        Console::printError("Vault is locked.");
+        std::cout << "Run: " << Console::BOLD << "lptv unlock" << Console::RESET << "\n\n";
         return false;
     }
     return true;
@@ -21,7 +20,7 @@ bool CommandDispatcher::requireUnlock() {
 
 bool CommandDispatcher::requireService(const Command& cmd) {
     if(cmd.args.empty()) {
-        std::cout << "Missing service name.\n";
+        Console::printError("Missing service name.");
         return false;
     }
     return true;
@@ -29,144 +28,120 @@ bool CommandDispatcher::requireService(const Command& cmd) {
 
 // === === public === ===
 int CommandDispatcher::execute(const Command& cmd) {
-    if(cmd.name == "help") {
-        std::cout << "\n\n === === === === === === === === === === ===\n"
-            << ">  " << "lptv init                - Initialize the vault\n"
-            << ">  " << "lptv unlock              - Unlock the vault\n"
-            << ">  " << "lptv lock                - Lock the vault\n"
-            << ">  " << "lptv status              - Check vault status\n"
-            << ">  " << "lptv shell               - Enter interactive mode\n"
-            << ">  " << "lptv list [cat]          - List accounts (optional category filter)\n"
-            << ">  " << "lptv list category       - List all categories\n"
-            << ">  " << "lptv search <query>      - Search accounts\n"
-            << ">  " << "lptv add <svc>           - Add a new account\n"
-            << ">  " << "lptv add category <cat>  - Add a new category\n"
-            << ">  " << "lptv update <svc>        - Update an account\n"
-            << ">  " << "lptv get <svc>           - Get account details\n"
-            << ">  " << "lptv delete <svc>        - Delete an account\n"
-            << ">  " << "lptv delete category <c> - Delete a category\n"
-            << "=== === === === === === === === === === ===\n\n\n";
+    if(cmd.name == "help" || cmd.name.empty()) {
+        std::cout << "\nUsage: lptv <command>\n\n"
+            << "where <command> is one of:\n"
+            << "    " << Console::BOLD << "init" << Console::RESET << "       Initialize the vault\n"
+            << "    " << Console::BOLD << "unlock" << Console::RESET << "     Unlock the vault\n"
+            << "    " << Console::BOLD << "lock" << Console::RESET << "       Lock the vault\n"
+            << "    " << Console::BOLD << "status" << Console::RESET << "     Check vault status\n"
+            << "    " << Console::BOLD << "shell" << Console::RESET << "      Enter interactive mode\n"
+            << "    " << Console::BOLD << "list" << Console::RESET << "       List accounts or categories\n"
+            << "    " << Console::BOLD << "search" << Console::RESET << "     Search accounts\n"
+            << "    " << Console::BOLD << "add" << Console::RESET << "        Add an account or category\n"
+            << "    " << Console::BOLD << "update" << Console::RESET << "     Update an account\n"
+            << "    " << Console::BOLD << "get" << Console::RESET << "        Get account details\n"
+            << "    " << Console::BOLD << "delete" << Console::RESET << "     Delete an account or category\n\n"
+            << "lptv help <command>  search for help on <command>\n"
+            << "lptv <command> -h    quick help on <command>\n\n";
 
         return 0;
     }
 
     if(cmd.name == "shell") {
-        std::cout << "\n\n--- Interactive Mode (type 'exit' or 'quit' to leave) ---\n";
+        Console::printHeader("Entering Interactive Mode");
+        std::cout << Console::GREY << "(type 'exit' or 'quit' to leave)" << Console::RESET << "\n\n";
         std::string input;
         while (true) {
-            std::cout << ">  " << "lptv> ";
+            std::cout << Console::CYAN << "lptv> " << Console::RESET;
             if (!std::getline(std::cin, input)) break;
             if (input == "exit" || input == "quit") break;
             if (input.empty()) continue;
 
             Command innerCmd = CommandParser::parse(input);
             if (innerCmd.name == "shell") {
-                std::cout << "Already in interactive mode.\n\n";
+                Console::printWarning("Already in interactive mode.");
                 continue;
             }
             execute(innerCmd);
-            std::cout << "\n";
         }
-        std::cout << "Exiting interactive mode.\n\n\n";
+        Console::printInfo("Exiting interactive mode.");
         return 0;
     }
 
     if(cmd.name == "init") {
         if(Vault::exists()) {
-            std::cout << "\nPassword vault already exists.\n\n\n";
+            Console::printWarning("Password vault already exists.");
             return 0;
         }
 
-        std::cout << "\nCreate lptv password: ";
+        std::cout << "Create lptv password: ";
         std::string password = Console::getHiddenInput();
 
         std::cout << "Confirm lptv password: ";
         std::string confirm = Console::getHiddenInput();
 
         if(password.empty()) {
-            std::cout << "Password cannot be empty!\n\n\n";
+            Console::printError("Password cannot be empty!");
             return 0;
         }
 
         if(password == confirm) {
             Vault::initialize();
             Vault::setLPTVPassword(password);
-            std::cout << "Password vault initialized.\n\n\n";
+            Console::printSuccess("Password vault initialized.");
             return 0;
         }
 
-        std::cout << "Passwords do not match.\n\n\n";
+        Console::printError("Passwords do not match.");
         return 0;
     }
 
     if(!Vault::exists()) {
-        std::cout
-            << "\nPassword vault not initialized.\n"
-            << "Run: lptv init\n\n\n";
-
+        Console::printError("Password vault not initialized.");
+        std::cout << "Run: " << Console::BOLD << "lptv init" << Console::RESET << "\n\n";
         return 0;
     }
 
     if(cmd.name == "status") {
-        std::cout << "\n === === === === === === === === === === ===\n";
-        std::cout << "=== === Vault Status\n";
-
-        std::cout
-            << "Initialized : "
-            << (Vault::exists() ? "Yes" : "No")
-            << "\n";
-
-        std::cout
-            << "Unlocked    : "
-            << (AuthGuard::verify()
-                    ? "Yes"
-                    : "No")
-            << "\n";
-
-        std::cout << "\n\n";
+        Console::printHeader("Vault Status");
+        std::cout << "  Initialized : " << (Vault::exists() ? Console::GREEN + "Yes" : Console::RED + "No") << Console::RESET << "\n";
+        std::cout << "  Unlocked    : " << (AuthGuard::verify() ? Console::GREEN + "Yes" : Console::RED + "No") << Console::RESET << "\n\n";
         return 0;
     }
 
     if(cmd.name == "unlock") {
         if(AuthGuard::verify()) {
-            std::cout << "\n\nPassword vault already unlocked.\n";
-            std::cout << "\n\n";
+            Console::printInfo("Password vault already unlocked.");
             return 0;
         }
 
-        std::cout << "\n\nEnter password: ";
+        std::cout << "Enter password: ";
         std::string password = Console::getHiddenInput();        
 
         if(Vault::verifyLPTV(password)) {
             AuthGuard::unlock();
-            std::cout << "Password vault unlocked.\n";
-            std::cout << "\n\n";
+            Console::printSuccess("Password vault unlocked.");
             return 0;
         }
 
-        std::cout << "Invalid password.\n";
-        std::cout << "\n\n";
+        Console::printError("Invalid password.");
         return 0;
     }
 
     if(cmd.name == "lock") {
         if(AuthGuard::verify()) {
             AuthGuard::lock();
-            std::cout << "\n\nPassword vault locked.\n";
-            std::cout << "\n\n";
+            Console::printSuccess("Password vault locked.");
             return 0;
         }
 
-        std::cout << "\n\nPassword vault already locked.\n";
-        std::cout << "\n\n";
+        Console::printInfo("Password vault already locked.");
         return 0;
     }
 
     if(cmd.name == "list") {
-        std::cout << "\n\n";
-        if(!requireUnlock()) {
-            return 0;
-        }
+        if(!requireUnlock()) return 0;
 
         PasswordManager lptv;
         if (!cmd.args.empty() && cmd.args[0] == "category") {
@@ -175,112 +150,75 @@ int CommandDispatcher::execute(const Command& cmd) {
             std::string category = cmd.args.empty() ? "" : cmd.args[0];
             lptv.list(category);
         }
-        std::cout << "\n\n";
         return 0;
     }
 
     if(cmd.name == "search") {
-        if(!requireUnlock()) {
-            std::cout << "\n\n";
-            return 0;
-        }
+        if(!requireUnlock()) return 0;
 
         if(cmd.args.empty()) {
-            std::cout << "\n\n";
-            std::cout << "Missing search query.\n";
-            std::cout << "\n\n";
+            Console::printError("Missing search query.");
             return 0;
         }
 
-        std::cout << "\n\n";
         PasswordManager lptv;
         lptv.search(cmd.args[0]);
-        std::cout << "\n\n";
         return 0;
     }
 
     if(cmd.name == "add") {
-        std::cout << "\n\n";
-
         if(!requireUnlock()) return 0;
         if(!requireService(cmd)) return 0;
 
         PasswordManager lptv;
         if (cmd.args[0] == "category") {
             if (cmd.args.size() < 2) {
-                std::cout << "Missing category name.\n";
+                Console::printError("Missing category name.");
             } else {
                 lptv.addCategory(cmd.args[1]);
             }
         } else {
             lptv.add(cmd.args[0]);
         }
-        std::cout << "\n\n";
         return 0;
     }
 
     if(cmd.name == "update") {
-        if(!requireUnlock()) {
-            std::cout << "\n\n";
-            return 0;
-        }
-
-        if(!requireService(cmd)) {
-            std::cout << "\n\n";
-            return 0;
-        }
+        if(!requireUnlock()) return 0;
+        if(!requireService(cmd)) return 0;
 
         PasswordManager lptv;
         lptv.update(cmd.args[0]);
-        std::cout << "\n\n";
         return 0;
     }
 
     if(cmd.name == "get") {
-        if(!requireUnlock()) {
-            std::cout << "\n\n";
-            return 0;
-        }
-
-        if(!requireService(cmd)) {
-            std::cout << "\n\n";
-            return 0;
-        }
+        if(!requireUnlock()) return 0;
+        if(!requireService(cmd)) return 0;
         
         PasswordManager lptv;
         lptv.get(cmd.args[0]);
-        std::cout << "\n\n";
         return 0;
     }
 
     if(cmd.name == "delete") {
-        if(!requireUnlock()) {
-            std::cout << "\n\n";
-            return 0;
-        }
-
-        if(!requireService(cmd)) {
-            std::cout << "\n\n";
-            return 0;
-        }
+        if(!requireUnlock()) return 0;
+        if(!requireService(cmd)) return 0;
 
         PasswordManager lptv;
         if (cmd.args[0] == "category") {
             if (cmd.args.size() < 2) {
-                std::cout << "Missing category name.\n";
+                Console::printError("Missing category name.");
             } else {
                 lptv.removeCategory(cmd.args[1]);
             }
         } else {
             lptv.remove(cmd.args[0]);
         }
-        std::cout << "\n\n";
         return 0;
     }
 
-    std::cout
-        << "Unknown command.\n"
-        << "Run: lptv help\n";
-    std::cout << "\n\n";
+    Console::printError("Unknown command: " + cmd.name);
+    std::cout << "Run " << Console::BOLD << "lptv help" << Console::RESET << " for usage.\n\n";
     return 0;
 }
