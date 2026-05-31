@@ -14,6 +14,14 @@ Account::Account(
     this->note = note;
 }
 
+Account::Account(const Account& other) {
+    this->service = other.service;
+    this->username = other.username;
+    this->password = other.password;
+    this->category = other.category;
+    this->note = other.note;
+}
+
 const std::string& Account::getService() const    { return service; }
 const std::string& Account::getUsername() const   { return username; }
 const std::string& Account::getPassword() const   { return password; }

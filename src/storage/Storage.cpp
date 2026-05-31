@@ -1,5 +1,6 @@
 #include "./../../include/storage/Storage.h"
 #include "./../../include/storage/Encryptor.h"
+#include "./../../include/utils/Constants.h"
 
 #include <fstream>
 #include <sstream>
@@ -7,25 +8,12 @@
 
 const std::string KEY = "lptvu.vuzle";
 
-static std::vector<std::string> split(const std::string& str, char delimiter) {
-    std::vector<std::string> result;
+// === === private === ===
 
-    std::stringstream ss(str);
-    std::string item;
 
-    while(std::getline(ss, item, delimiter)) {
-        result.push_back(item);
-    }
-
-    if (!str.empty() && str.back() == delimiter) {
-        result.push_back("");
-    }
-
-    return result;
-}
-
+// === === public === ===
 bool Storage::save(
-    const std::vector<Account>& accounts,
+    const VaultData& vaultData,
     const std::string& path
 ) {
     std::filesystem::path p(path);
@@ -38,28 +26,24 @@ bool Storage::save(
         return false;
     }
 
-    std::string data = "";
-    for(const auto& account : accounts) {
-        data += account.getService() + "|"
-            + account.getUsername() + "|"
-            + account.getPassword() + "|"
-            + account.getCategory() + "|"
-            + account.getNote() + "\n";
-    }
-    file << Encryptor::encrypt(data, KEY);
+    json j;
+    j[Constants::ACCOUNT] = vaultData.accounts;
+    j[Constants::CATEGORY] = vaultData.categories;
+
+    std::string data = j.dump(4);
+    file << data;
+    // file << Encryptor::encrypt(data, KEY);
 
     file.close();
     return true;
 }
 
-std::vector<Account> Storage::load(
+VaultData Storage::load(
     const std::string& path
-) {
-    std::vector<Account> accounts;
-    
+) {    
     std::ifstream file(path);
     if(!file.is_open()) {
-        return accounts;
+        return {};
     }
 
     std::stringstream buffer;
@@ -67,61 +51,29 @@ std::vector<Account> Storage::load(
     file.close();
 
     std::string encryted = buffer.str();
-    std::string plaintext = Encryptor::decrypt(encryted, KEY);
+    // std::string plaintext = Encryptor::decrypt(encryted, KEY);
 
-    std::stringstream ss(plaintext);
-    std::string line;
-    while(std::getline(ss, line)) {
-        if(line.empty()) {
-            continue;
-        }
-
-        auto parts = split(line, '|');
-
-        if(parts.size() == 3) {
-            accounts.emplace_back(parts[0], parts[1], parts[2], "", "");
-        } else if(parts.size() == 4) {
-            accounts.emplace_back(parts[0], parts[1], parts[2], parts[3], "");
-        } else if(parts.size() >= 5) {
-            accounts.emplace_back(parts[0], parts[1], parts[2], parts[3], parts[4]);
-        }
+    if(encryted.empty()) {
+        return {};
     }
-    
-    return accounts;
+
+    // json j = json::parse(plaintext);
+    json j = json::parse(encryted);
+
+    VaultData vaultData;
+
+    if(j.contains(Constants::ACCOUNT)) {
+        vaultData.accounts =
+            j[Constants::ACCOUNT]
+            .get<std::vector<Account>>();
+    }
+
+    if(j.contains(Constants::CATEGORY)) {
+        vaultData.categories =
+            j[Constants::CATEGORY]
+            .get<std::vector<std::string>>();
+    }
+
+    return vaultData;
 }
 
-bool Storage::saveCategories(
-    const std::vector<std::string>& categories,
-    const std::string& path
-) {
-    std::ofstream file(path);
-    if(!file.is_open()) return false;
-
-    std::string data = "";
-    for(const auto& cat : categories) {
-        data += cat + "\n";
-    }
-    file << Encryptor::encrypt(data, KEY);
-    file.close();
-    return true;
-}
-
-std::vector<std::string> Storage::loadCategories(
-    const std::string& path
-) {
-    std::vector<std::string> categories;
-    std::ifstream file(path);
-    if(!file.is_open()) return categories;
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    file.close();
-
-    std::string plaintext = Encryptor::decrypt(buffer.str(), KEY);
-    std::stringstream ss(plaintext);
-    std::string line;
-    while(std::getline(ss, line)) {
-        if(!line.empty()) categories.push_back(line);
-    }
-    return categories;
-}

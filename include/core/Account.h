@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 class Account {
 private:
@@ -20,6 +23,8 @@ public:
         const std::string& note
     );
 
+    Account(const Account& other);
+
     const std::string& getService() const;
     const std::string& getUsername() const;
     const std::string& getPassword() const;
@@ -32,3 +37,24 @@ public:
     void setCategory(const std::string& category);
     void setNote(const std::string& note);
 };
+
+inline void to_json(json& j, const Account& a) {
+    j = {
+        {"service", a.getService()},
+        {"username", a.getUsername()},
+        {"password", a.getPassword()},
+        {"category", a.getCategory()},
+        {"note", a.getNote()}
+    };
+}
+
+inline void from_json(const json& j, Account& a) {
+    a = Account(
+        j.value("service", ""),
+        j.value("username", ""),
+        j.value("password", ""),
+        j.value("category", ""),
+        j.value("note", "")
+    );
+}
+

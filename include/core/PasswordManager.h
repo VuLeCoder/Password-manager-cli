@@ -24,6 +24,5 @@ private:
     Account* findAccount(const std::string& service);
     const Account* findAccount(const std::string& service) const;
     bool save();
-    bool saveCats();
     Account inputAccount(const std::string& service);
 };

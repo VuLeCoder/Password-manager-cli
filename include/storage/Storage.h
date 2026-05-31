@@ -1,26 +1,20 @@
 #pragma once
-#include "./../core/Account.h"
+#include "./VaultData.h"
 
 #include <vector>
 #include <string>
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
 class Storage {
 public:
     static bool save(
-        const std::vector<Account>& accounts,
+        const VaultData& vaultData,
         const std::string& path
     );
 
-    static std::vector<Account> load(
-        const std::string& path
-    );
-
-    static bool saveCategories(
-        const std::vector<std::string>& categories,
-        const std::string& path
-    );
-
-    static std::vector<std::string> loadCategories(
+    static VaultData load(
         const std::string& path
     );
 };

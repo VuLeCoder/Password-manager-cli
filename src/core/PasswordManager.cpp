@@ -34,7 +34,7 @@ const Account* PasswordManager::findAccount(const std::string& service) const {
 }
 
 bool PasswordManager::save() {
-    return Storage::save(accounts, Constants::VAULT_DB);
+    return Storage::save({accounts, categories}, Constants::VAULT_DB);
 }
 
 Account PasswordManager::inputAccount(const std::string& service) {
@@ -100,8 +100,9 @@ Account PasswordManager::inputAccount(const std::string& service) {
 
 // === === public === ===
 PasswordManager::PasswordManager() {
-    accounts = Storage::load(Constants::VAULT_DB);
-    categories = Storage::loadCategories(Constants::CATEGORY_DB);
+    VaultData data = Storage::load(Constants::VAULT_DB);
+    accounts = data.accounts;
+    categories = data.categories;
 }
 
 void PasswordManager::listCategories() const {
@@ -126,7 +127,7 @@ void PasswordManager::addCategory(const std::string& category) {
     }
 
     categories.push_back(category);
-    if (saveCats()) {
+    if (save()) {
         Console::printSuccess("Category '" + category + "' added.");
     } else {
         Console::printError("Failed to save category.");
@@ -140,7 +141,7 @@ void PasswordManager::removeCategory(const std::string& category) {
 
     if (it != categories.end()) {
         categories.erase(it);
-        if (saveCats()) {
+        if (save()) {
             Console::printSuccess("Category '" + category + "' removed.");
         } else {
             Console::printError("Failed to save categories.");
@@ -148,10 +149,6 @@ void PasswordManager::removeCategory(const std::string& category) {
     } else {
         Console::printError("Category '" + category + "' not found.");
     }
-}
-
-bool PasswordManager::saveCats() {
-    return Storage::saveCategories(categories, Constants::CATEGORY_DB);
 }
 
 void PasswordManager::search(const std::string& query) const {
