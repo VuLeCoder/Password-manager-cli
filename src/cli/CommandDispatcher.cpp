@@ -28,22 +28,79 @@ bool CommandDispatcher::requireService(const Command& cmd) {
 
 // === === public === ===
 int CommandDispatcher::execute(const Command& cmd) {
-    if(cmd.name == "help" || cmd.name.empty()) {
-        std::cout << "\nUsage: lptv <command>\n\n"
-            << "where <command> is one of:\n"
-            << "    " << Console::BOLD << "init" << Console::RESET << "       Initialize the vault\n"
-            << "    " << Console::BOLD << "unlock" << Console::RESET << "     Unlock the vault\n"
-            << "    " << Console::BOLD << "lock" << Console::RESET << "       Lock the vault\n"
-            << "    " << Console::BOLD << "status" << Console::RESET << "     Check vault status\n"
-            << "    " << Console::BOLD << "shell" << Console::RESET << "      Enter interactive mode\n"
-            << "    " << Console::BOLD << "list" << Console::RESET << "       List accounts or categories\n"
-            << "    " << Console::BOLD << "search" << Console::RESET << "     Search accounts\n"
-            << "    " << Console::BOLD << "add" << Console::RESET << "        Add an account or category\n"
-            << "    " << Console::BOLD << "update" << Console::RESET << "     Update an account\n"
-            << "    " << Console::BOLD << "get" << Console::RESET << "        Get account details\n"
-            << "    " << Console::BOLD << "delete" << Console::RESET << "     Delete an account or category\n\n"
-            << "lptv help <command>  search for help on <command>\n"
-            << "lptv <command> -h    quick help on <command>\n\n";
+    bool isHelpRequested = cmd.name == "help" || cmd.name.empty() || cmd.name == "-h" || cmd.name == "--help";
+    
+    if (!isHelpRequested) {
+        for (const auto& arg : cmd.args) {
+            if (arg == "-h" || arg == "--help") {
+                isHelpRequested = true;
+                break;
+            }
+        }
+    }
+
+    if (isHelpRequested) {
+        std::string targetCmd = "";
+        if (cmd.name == "help" && !cmd.args.empty()) {
+            targetCmd = cmd.args[0];
+        } else if (cmd.name != "help" && cmd.name != "-h" && cmd.name != "--help") {
+            targetCmd = cmd.name;
+        }
+
+        if (targetCmd == "add") {
+            Console::printHeader("Help: add");
+            std::cout << "  Usage: lptv add <service>         Add a new account\n"
+                      << "         lptv add category <name>   Add a new category\n\n";
+        } else if (targetCmd == "list") {
+            Console::printHeader("Help: list");
+            std::cout << "  Usage: lptv list                  List all accounts\n"
+                      << "         lptv list <category>       List accounts in category\n"
+                      << "         lptv list category         List all categories\n\n";
+        } else if (targetCmd == "get") {
+            Console::printHeader("Help: get");
+            std::cout << "  Usage: lptv get <service>          Show account details and copy password\n\n";
+        } else if (targetCmd == "delete") {
+            Console::printHeader("Help: delete");
+            std::cout << "  Usage: lptv delete <service>       Remove an account\n"
+                      << "         lptv delete category <name> Remove a category\n\n";
+        } else if (targetCmd == "update") {
+            Console::printHeader("Help: update");
+            std::cout << "  Usage: lptv update <service>       Update account details\n\n";
+        } else if (targetCmd == "search") {
+            Console::printHeader("Help: search");
+            std::cout << "  Usage: lptv search <query>         Search accounts by service or username\n\n";
+        } else if (targetCmd == "init") {
+            Console::printHeader("Help: init");
+            std::cout << "  Usage: lptv init                   Initialize a new vault and set master password\n\n";
+        } else if (targetCmd == "unlock") {
+            Console::printHeader("Help: unlock");
+            std::cout << "  Usage: lptv unlock                 Unlock the vault to access accounts\n\n";
+        } else if (targetCmd == "lock") {
+            Console::printHeader("Help: lock");
+            std::cout << "  Usage: lptv lock                   Lock the vault and clear session\n\n";
+        } else if (targetCmd == "status") {
+            Console::printHeader("Help: status");
+            std::cout << "  Usage: lptv status                 Check if vault is initialized and unlocked\n\n";
+        } else if (targetCmd == "shell") {
+            Console::printHeader("Help: shell");
+            std::cout << "  Usage: lptv shell                  Enter interactive shell mode\n\n";
+        } else {
+            std::cout << "\nUsage: lptv <command>\n\n"
+                << "where <command> is one of:\n"
+                << "    " << Console::BOLD << "init" << Console::RESET << "       Initialize the vault\n"
+                << "    " << Console::BOLD << "unlock" << Console::RESET << "     Unlock the vault\n"
+                << "    " << Console::BOLD << "lock" << Console::RESET << "       Lock the vault\n"
+                << "    " << Console::BOLD << "status" << Console::RESET << "     Check vault status\n"
+                << "    " << Console::BOLD << "shell" << Console::RESET << "      Enter interactive mode\n"
+                << "    " << Console::BOLD << "list" << Console::RESET << "       List accounts or categories\n"
+                << "    " << Console::BOLD << "search" << Console::RESET << "     Search accounts\n"
+                << "    " << Console::BOLD << "add" << Console::RESET << "        Add an account or category\n"
+                << "    " << Console::BOLD << "update" << Console::RESET << "     Update an account\n"
+                << "    " << Console::BOLD << "get" << Console::RESET << "        Get account details\n"
+                << "    " << Console::BOLD << "delete" << Console::RESET << "     Delete an account or category\n\n"
+                << "lptv help <command>  search for help on <command>\n"
+                << "lptv <command> -h    quick help on <command>\n\n";
+        }
 
         return 0;
     }
