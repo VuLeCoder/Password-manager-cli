@@ -116,7 +116,8 @@ int CommandDispatcher::execute(const Command& cmd) {
                 << "    " << Console::BOLD << "get" << Console::RESET << "        Get account details\n"
                 << "    " << Console::BOLD << "delete" << Console::RESET << "     Delete an account or category\n\n"
                 << "lptv help <command>  search for help on <command>\n"
-                << "lptv <command> -h    quick help on <command>\n\n";
+                << "lptv <command> -h    quick help on <command>\n\n"
+                << Console::GREY << "Note: Standalone commands will auto-prompt for password if the vault is locked." << Console::RESET << "\n\n";
         }
 
         return 0;
