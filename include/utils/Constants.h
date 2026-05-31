@@ -13,5 +13,5 @@ namespace Constants {
     
     inline const std::string CONFIG_FILE = VAULT_DIR + "/config.json";
 
-    inline constexpr int SESSION_TIMEOUT = 1800;
+    inline constexpr int SESSION_TIMEOUT = 300;
 }
