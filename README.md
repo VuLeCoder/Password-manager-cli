@@ -53,8 +53,6 @@ Sau khi biên dịch thành công, bạn sẽ nhận được tệp thực thi `
 | Lệnh | Mô tả |
 | :--- | :--- |
 | `lptv init` | Khởi tạo Vault mới và thiết lập Master Password. |
-| `lptv unlock` | Mở khóa Vault để bắt đầu sử dụng. |
-| `lptv lock` | Khóa Vault thủ công và xóa session hiện tại. |
 | `lptv status` | Kiểm tra trạng thái Vault (đã khởi tạo/mở khóa chưa). |
 | `lptv list` | Liệt kê tất cả tài khoản hoặc danh mục. |
 | `lptv add` | Thêm mới một tài khoản hoặc danh mục. |
@@ -66,7 +64,6 @@ Sau khi biên dịch thành công, bạn sẽ nhận được tệp thực thi `
 
 > **Lưu ý:**
 > - **Chế độ độc lập (Standalone):** Khi chạy các lệnh như `list`, `add`, `get`,... nếu Vault đang khóa, ứng dụng sẽ **tự động yêu cầu nhập mật khẩu** để thực thi lệnh ngay lập tức.
-> - **Chế độ Shell:** Trong `lptv shell`, bạn cần dùng lệnh `unlock` để mở khóa một lần và sử dụng cho cả phiên làm việc.
 
 *Dùng `lptv help <command>` để xem hướng dẫn chi tiết cho từng lệnh.*
 

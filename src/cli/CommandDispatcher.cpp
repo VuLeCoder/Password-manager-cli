@@ -89,12 +89,6 @@ int CommandDispatcher::execute(const Command& cmd) {
         } else if (targetCmd == "init") {
             Console::printHeader("Help: init");
             std::cout << "  Usage: lptv init                   Initialize a new vault and set master password\n\n";
-        } else if (targetCmd == "unlock") {
-            Console::printHeader("Help: unlock");
-            std::cout << "  Usage: lptv unlock                 Unlock the vault to access accounts\n\n";
-        } else if (targetCmd == "lock") {
-            Console::printHeader("Help: lock");
-            std::cout << "  Usage: lptv lock                   Lock the vault and clear session\n\n";
         } else if (targetCmd == "status") {
             Console::printHeader("Help: status");
             std::cout << "  Usage: lptv status                 Check if vault is initialized and unlocked\n\n";
@@ -105,8 +99,6 @@ int CommandDispatcher::execute(const Command& cmd) {
             std::cout << "\nUsage: lptv <command>\n\n"
                 << "where <command> is one of:\n"
                 << "    " << Console::BOLD << "init" << Console::RESET << "       Initialize the vault\n"
-                << "    " << Console::BOLD << "unlock" << Console::RESET << "     Unlock the vault\n"
-                << "    " << Console::BOLD << "lock" << Console::RESET << "       Lock the vault\n"
                 << "    " << Console::BOLD << "status" << Console::RESET << "     Check vault status\n"
                 << "    " << Console::BOLD << "shell" << Console::RESET << "      Enter interactive mode\n"
                 << "    " << Console::BOLD << "list" << Console::RESET << "       List accounts or categories\n"
@@ -120,29 +112,6 @@ int CommandDispatcher::execute(const Command& cmd) {
                 << Console::GREY << "Note: Standalone commands will auto-prompt for password if the vault is locked." << Console::RESET << "\n\n";
         }
 
-        return 0;
-    }
-
-    if(cmd.name == "shell") {
-        m_isShellMode = true;
-        Console::printHeader("Entering Interactive Mode");
-        std::cout << Console::GREY << "(type 'exit' or 'quit' to leave)" << Console::RESET << "\n\n";
-        std::string input;
-        while (true) {
-            std::cout << Console::CYAN << "lptv> " << Console::RESET;
-            if (!std::getline(std::cin, input)) break;
-            if (input == "exit" || input == "quit") break;
-            if (input.empty()) continue;
-
-            Command innerCmd = CommandParser::parse(input);
-            if (innerCmd.name == "shell") {
-                Console::printWarning("Already in interactive mode.");
-                continue;
-            }
-            execute(innerCmd);
-        }
-        m_isShellMode = false;
-        Console::printInfo("Exiting interactive mode.");
         return 0;
     }
 
@@ -180,41 +149,44 @@ int CommandDispatcher::execute(const Command& cmd) {
         return 0;
     }
 
-    if(cmd.name == "status") {
-        Console::printHeader("Vault Status");
-        std::cout << "  Initialized : " << (Vault::exists() ? Console::GREEN + "Yes" : Console::RED + "No") << Console::RESET << "\n";
-        std::cout << "  Unlocked    : " << (AuthGuard::verify() ? Console::GREEN + "Yes" : Console::RED + "No") << Console::RESET << "\n\n";
-        return 0;
-    }
-
-    if(cmd.name == "unlock") {
-        if(AuthGuard::verify()) {
-            Console::printInfo("Password vault already unlocked.");
-            return 0;
-        }
-
+    if(cmd.name == "shell") {
         std::cout << "Enter password: ";
         std::string password = Console::getHiddenInput();        
 
         std::pair<bool, std::array<uint8_t, 32>> res = Vault::verifyLPTV(password);
-        if(res.first) {
-            AuthGuard::unlock(res.second);
-            Console::printSuccess("Password vault unlocked.");
+        if(!res.first) {
+            Console::printError("Invalid password.");
             return 0;
         }
+        
+        AuthGuard::unlock(res.second);
 
-        Console::printError("Invalid password.");
+        m_isShellMode = true;
+        Console::printHeader("Entering Interactive Mode");
+        std::cout << Console::GREY << "(type 'exit' or 'quit' to leave)" << Console::RESET << "\n\n";
+        std::string input;
+        while (true) {
+            std::cout << Console::CYAN << "lptv> " << Console::RESET;
+            if (!std::getline(std::cin, input)) break;
+            if (input == "exit" || input == "quit") break;
+            if (input.empty()) continue;
+
+            Command innerCmd = CommandParser::parse(input);
+            if (innerCmd.name == "shell") {
+                Console::printWarning("Already in interactive mode.");
+                continue;
+            }
+            execute(innerCmd);
+        }
+        m_isShellMode = false;
+        Console::printInfo("Exiting interactive mode.");
         return 0;
     }
 
-    if(cmd.name == "lock") {
-        if(AuthGuard::verify()) {
-            AuthGuard::lock();
-            Console::printSuccess("Password vault locked.");
-            return 0;
-        }
-
-        Console::printInfo("Password vault already locked.");
+    if(cmd.name == "status") {
+        Console::printHeader("Vault Status");
+        std::cout << "  Initialized : " << (Vault::exists() ? Console::GREEN + "Yes" : Console::RED + "No") << Console::RESET << "\n";
+        std::cout << "  Unlocked    : " << (AuthGuard::verify() ? Console::GREEN + "Yes" : Console::RED + "No") << Console::RESET << "\n\n";
         return 0;
     }
 

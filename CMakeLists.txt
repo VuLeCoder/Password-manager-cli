@@ -22,7 +22,6 @@ set(SOURCES
     src/core/AuthGuard.cpp
     src/core/PasswordManager.cpp
     src/core/SessionContext.cpp
-    src/core/SessionManager.cpp
     src/core/Vault.cpp
 
     src/storage/Storage.cpp
@@ -41,7 +40,6 @@ set(HEADERS
     include/core/Account.h
     include/core/AuthGuard.h
     include/core/PasswordManager.h
-    include/core/SessionManager.h
     include/core/SessionContext.h
     include/core/Vault.h
 
