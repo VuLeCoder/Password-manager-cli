@@ -6,6 +6,9 @@ project(PasswordManager)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(ARGON2 REQUIRED libargon2)
+
 # Source files
 set(SOURCES
     src/main.cpp
@@ -50,7 +53,24 @@ set(HEADERS
 add_executable(password-manager ${SOURCES} ${HEADERS})
 
 # Include directories
-target_include_directories(password-manager PRIVATE include)
+target_include_directories(
+    password-manager 
+    PRIVATE 
+    include
+    ${ARGON2_INCLUDE_DIRS}
+)
+
+target_link_directories(
+    password-manager
+    PRIVATE
+    ${ARGON2_LIBRARY_DIRS}
+)
+
+target_link_libraries(
+    password-manager
+    PRIVATE
+    ${ARGON2_LIBRARIES}
+)
 
 set_target_properties(password-manager PROPERTIES
     OUTPUT_NAME "lptv"

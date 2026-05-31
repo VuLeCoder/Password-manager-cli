@@ -50,15 +50,42 @@ bool Vault::hasLPTVPassword() {
 }
 
 void Vault::setLPTVPassword(const std::string& password) {
-    std::ofstream file(Constants::MASTER_FILE);
-    file << Security::hash(password);
+    auto salt = Security::generateSalt();
+    auto key = Security::deriveKey(password, salt);
+
+    std::ofstream file(Constants::MASTER_FILE, std::ios::binary);
+    
+    file.write(
+        reinterpret_cast<const char*>(salt.data()),
+        salt.size()
+    );
+
+    file.write(
+        reinterpret_cast<const char*>(key.data()),
+        key.size()
+    );
 }
 
 bool Vault::verifyLPTV(const std::string& password) {
-    std::ifstream file(Constants::MASTER_FILE);
+    std::ifstream file(Constants::MASTER_FILE, std::ios::binary);
 
-    std::string savedHash;
-    std::getline(file, savedHash);
+    std::vector<uint8_t> salt(16);
+    std::array<uint8_t, 32> savedVerifier;
 
-    return savedHash == Security::hash(password);
+    file.read(
+        reinterpret_cast<char*>(salt.data()),
+        salt.size()
+    );
+
+    file.read(
+        reinterpret_cast<char*>(savedVerifier.data()),
+        savedVerifier.size()
+    );
+
+    auto key = Security::deriveKey(
+        password,
+        salt
+    );
+
+    return key == savedVerifier;
 }
