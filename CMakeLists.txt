@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 
 project(PasswordManager)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -76,8 +80,19 @@ target_link_libraries(
     ${ARGON2_LIBRARIES}
     ${OPENSSL_LIBRARIES}
     nlohmann_json::nlohmann_json
+    crypt32
+    ws2_32
+    bcrypt
 )
 
 set_target_properties(password-manager PROPERTIES
     OUTPUT_NAME "lptv"
 )
+
+if(MINGW)
+    target_link_options(password-manager PRIVATE
+        -static
+        -static-libgcc
+        -static-libstdc++
+    )
+endif()
