@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(ARGON2 REQUIRED libargon2)
 pkg_check_modules(OPENSSL REQUIRED openssl)
+find_package(nlohmann_json REQUIRED)
 
 # Source files
 set(SOURCES
@@ -74,6 +75,7 @@ target_link_libraries(
     PRIVATE
     ${ARGON2_LIBRARIES}
     ${OPENSSL_LIBRARIES}
+    nlohmann_json::nlohmann_json
 )
 
 set_target_properties(password-manager PROPERTIES
