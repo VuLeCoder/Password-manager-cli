@@ -85,6 +85,12 @@ std::string Console::getHiddenInput() {
     return input;
 }
 
+void Console::printHiddenPassword(const std::string& password) {
+    for(int i=0; i<password.length(); ++i) {
+        std::cout << '*';
+    }
+}
+
 void Console::printTable(
     const std::vector<std::string>& headers,
     const std::vector<std::vector<std::string>>& rows

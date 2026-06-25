@@ -5,6 +5,8 @@
 class Console{
 public:
     static std::string getHiddenInput();
+    static void printHiddenPassword(const std::string& password);
+
     static void printTable(
         const std::vector<std::string>& headers,
         const std::vector<std::vector<std::string>>& rows

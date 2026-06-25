@@ -275,7 +275,11 @@ void PasswordManager::get(const std::string& service) const {
     Console::printHeader("Account Details: " + account->getService());
     std::cout << "  " << Console::BOLD << "Service " << Console::RESET << " : " << account->getService() << "\n";
     std::cout << "  " << Console::BOLD << "Username" << Console::RESET << " : " << account->getUsername() << "\n";
-    std::cout << "  " << Console::BOLD << "Password" << Console::RESET << " : " << account->getPassword() << "\n";
+
+    std::cout << "  " << Console::BOLD << "Password" << Console::RESET << " : ";
+    Console::printHiddenPassword(account->getPassword());
+    std::cout << "\n";
+    
     std::cout << "  " << Console::BOLD << "Category" << Console::RESET << " : " << account->getCategory() << "\n";
     std::cout << "  " << Console::BOLD << "Note    " << Console::RESET << " : " << account->getNote() << "\n";
 
