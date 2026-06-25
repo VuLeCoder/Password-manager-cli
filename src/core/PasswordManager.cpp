@@ -265,7 +265,7 @@ void PasswordManager::update(const std::string& service) {
     Console::printError("Failed to update account.");
 }
 
-void PasswordManager::get(const std::string& service) const {
+void PasswordManager::get(const std::string& service, bool isHiddenPassword) const {
     const Account* account = findAccount(service);
     if(account == nullptr) {
         Console::printError("Account not found.");
@@ -277,7 +277,8 @@ void PasswordManager::get(const std::string& service) const {
     std::cout << "  " << Console::BOLD << "Username" << Console::RESET << " : " << account->getUsername() << "\n";
 
     std::cout << "  " << Console::BOLD << "Password" << Console::RESET << " : ";
-    Console::printHiddenPassword(account->getPassword());
+    if(isHiddenPassword) Console::printHiddenPassword(account->getPassword());
+    else std::cout << account->getPassword();
     std::cout << "\n";
     
     std::cout << "  " << Console::BOLD << "Category" << Console::RESET << " : " << account->getCategory() << "\n";

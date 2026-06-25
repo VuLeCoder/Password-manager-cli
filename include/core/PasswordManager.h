@@ -17,7 +17,7 @@ public:
     void addCategory(const std::string& category);
     void removeCategory(const std::string& category);
     void update(const std::string& service);
-    void get(const std::string& service) const;
+    void get(const std::string& service, bool isHiddenPassword) const;
     void remove(const std::string& service);
 
 private:

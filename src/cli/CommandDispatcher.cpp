@@ -245,9 +245,14 @@ int CommandDispatcher::execute(const Command& cmd) {
     if(cmd.name == "get") {
         if(!requireUnlock()) return 0;
         if(!requireService(cmd)) return 0;
+
+        bool isHiddenPassword = true;
+        if(cmd.args.size() > 1) {
+            isHiddenPassword = !(cmd.args[1] == "--show");
+        }
         
         PasswordManager lptv;
-        lptv.get(cmd.args[0]);
+        lptv.get(cmd.args[0], isHiddenPassword);
         return 0;
     }
 
