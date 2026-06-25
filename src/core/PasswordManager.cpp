@@ -47,7 +47,7 @@ Account PasswordManager::inputAccount(const std::string& service) {
     std::getline(std::cin, username);
 
     std::cout << Console::BOLD << "  Password " << Console::RESET << ": ";
-    std::getline(std::cin, password);
+    password = Console::getHiddenInput();
 
     if (categories.empty()) {
         std::cout << Console::BOLD << "  Category " << Console::RESET << "(Enter new): ";
