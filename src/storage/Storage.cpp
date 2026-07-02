@@ -8,24 +8,62 @@
 #include <filesystem>
 #include <openssl/rand.h>
 
-// === === private === ===
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
+// === === private === ===
+bool Storage::replaceVault(
+    const std::string& tempPath,
+    const std::string& finalPath
+) {
+#ifdef _WIN32
+    std::wstring tempW = std::filesystem::path(tempPath).wstring();
+    std::wstring finalW = std::filesystem::path(finalPath).wstring();
+    
+    BOOL ok = MoveFileExW(
+        tempW.c_str(),
+        finalW.c_str(),
+        MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH
+    );
+
+    return ok != 0;
+#else
+    std::error_code ec;
+    std::filesystem::rename(tempPath, finalPath, ec);
+    return !ec;
+#endif
+}
 
 // === === public === ===
 bool Storage::save(
     const VaultData& vaultData,
     const std::string& path
 ) {
-    std::filesystem::path p(path);
-    if(p.has_parent_path()) {
-        std::filesystem::create_directories(p.parent_path());
+    std::filesystem::path finalPath(path);
+    std::filesystem::path tempPath = finalPath;
+    tempPath += ".tmp";
+
+    if(finalPath.has_parent_path()) {
+        std::filesystem::create_directories(finalPath.parent_path());
     }
-    
-    std::ofstream file(path, std::ios::binary);
-    if(!file.is_open()) {
+
+    if(!saveDraft(vaultData, tempPath.string())) {
         return false;
     }
 
+    if(!replaceVault(tempPath.string(), finalPath.string())) {
+        std::filesystem::remove(tempPath);
+        return false;
+    }
+
+    return true;
+}
+
+bool Storage::saveDraft(
+    const VaultData& vaultData,
+    const std::string& tempPath
+) {
     json j;
     j[Constants::ACCOUNT] = vaultData.accounts;
     j[Constants::CATEGORY] = vaultData.categories;
@@ -37,7 +75,10 @@ bool Storage::save(
 
     std::array<uint8_t, 12> nonce;
     std::array<uint8_t, 16> tag;
-    RAND_bytes(nonce.data(), nonce.size());
+    
+    if(RAND_bytes(nonce.data(), nonce.size()) != 1) {
+        return false;
+    }
 
     std::vector<uint8_t> ciphertext;
     bool ok = Encryptor::encrypt(
@@ -48,6 +89,11 @@ bool Storage::save(
         tag
     );
     if(!ok) return false;
+
+    std::ofstream file(tempPath, std::ios::binary);
+    if(!file.is_open()) {
+        return false;
+    }
     
     file.write(reinterpret_cast<char*>(nonce.data()), nonce.size());
     file.write(reinterpret_cast<char*>(tag.data()), tag.size());
