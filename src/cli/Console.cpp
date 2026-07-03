@@ -92,9 +92,7 @@ std::string Console::getHiddenInput() {
 }
 
 void Console::printHiddenPassword(const std::string& password) {
-    for(int i=0; i<password.length(); ++i) {
-        std::cout << '*';
-    }
+    std::cout << "***********";
 }
 
 void Console::printTable(
