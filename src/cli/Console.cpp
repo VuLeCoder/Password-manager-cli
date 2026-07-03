@@ -66,8 +66,13 @@ std::string Console::getHiddenInput() {
     std::string input;
 
     while(true) {
-        char c = _getch();
+        int c = _getch();
         
+        if(c == 0 || c == 0xE0) {
+            _getch();
+            continue;
+        }
+
         if(c == '\r') {
             std::cout << std::endl;
             break;
@@ -80,7 +85,8 @@ std::string Console::getHiddenInput() {
             continue;
         }
 
-        input += c;
+        if(c < 32 || c > 126) continue;
+        input += static_cast<char>(c);
     }
     return input;
 }
