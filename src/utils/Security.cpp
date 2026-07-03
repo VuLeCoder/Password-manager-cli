@@ -4,8 +4,8 @@
 #include <sstream>
 #include <iomanip>
 #include <argon2.h>
-#include <random>
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 
 // === === public === ===
 std::array<uint8_t, 32> Security::sha256(
@@ -36,10 +36,13 @@ std::array<uint8_t, 32> Security::sha256(
 }
 
 std::vector<uint8_t> Security::generateSalt(size_t length) {
-    std::random_device rd;
+    if (length == 0) {
+        return {};
+    }
+    
     std::vector<uint8_t> salt(length);
-    for(size_t i=0; i<length; ++i) {
-        salt[i] = static_cast<uint8_t>(rd());
+    if(RAND_bytes(salt.data(), static_cast<int>(salt.size())) != 1) {
+        throw std::runtime_error("Failed to generate random salt using OpenSSL RAND_bytes");
     }
     return salt;
 }
