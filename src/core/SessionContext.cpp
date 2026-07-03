@@ -1,6 +1,7 @@
 #include "./../../include/core/SessionContext.h"
 #include <algorithm>
 #include <cstring>
+#include <openssl/crypto.h>
 
 SessionContext& SessionContext::get() {
     static SessionContext instance;
@@ -17,7 +18,7 @@ const std::array<uint8_t, 32>& SessionContext::getKey() const {
 }
 
 void SessionContext::clear() {
-    std::fill(key.begin(), key.end(), 0);
+    OPENSSL_cleanse(key.data(), key.size());
     active = false;
 }
 
