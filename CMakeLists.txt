@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(PasswordManager)
 
+add_subdirectory(external/Secure-string)
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -77,6 +79,7 @@ target_link_directories(
 target_link_libraries(
     password-manager
     PRIVATE
+    SecureString
     ${ARGON2_LIBRARIES}
     ${OPENSSL_LIBRARIES}
     nlohmann_json::nlohmann_json
