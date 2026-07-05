@@ -1,8 +1,7 @@
 #pragma once
-#include <string>
+#include <string/SecureString.h>
 #include <cstdint>
 #include <array>
-#include <utility>
 
 class Vault{
 public:
@@ -10,6 +9,6 @@ public:
     static bool initialize();
 
     static bool hasLPTVPassword();
-    static void setLPTVPassword(const std::string& password);
-    static std::pair<bool, std::array<uint8_t, 32>> verifyLPTV(const std::string& password);
+    static void setLPTVPassword(const SecureString& password);
+    static std::pair<bool, std::array<uint8_t, 32>> verifyLPTV(const SecureString& password);
 };

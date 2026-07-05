@@ -5,9 +5,19 @@
 #include "./../../include/core/AuthGuard.h"
 #include "./../../include/core/PasswordManager.h"
 #include "./../../include/core/Vault.h"
+#include "string/SecureString.h"
 
 #include <iostream>
+#include <string_view>
 #include <unordered_map>
+
+// === === helper === ===
+// === === === === === ===
+struct HelpInfo {
+    std::string title;
+    std::string usage;
+};
+// === === === === === ===
 
 bool CommandDispatcher::m_isShellMode = false;
 
@@ -23,7 +33,8 @@ bool CommandDispatcher::requireUnlock() {
         return false;
     } else {
         std::cout << "Vault is locked. Enter password: ";
-        std::string password = Console::getHiddenInput();
+        SecureString password;
+        Console::readSecureHiddenInput(password);
         
         std::pair<bool, std::array<uint8_t, 32>> res = Vault::verifyLPTV(password);
         if(res.first) {
@@ -56,15 +67,10 @@ bool CommandDispatcher::isHelp(const Command& cmd) {
     return false;
 }
 
-struct HelpInfo {
-    std::string title;
-    std::string usage;
-};
-
 int CommandDispatcher::handleHelp(const Command& cmd) {
     std::string targetCmd = "";
     if (cmd.name == "help" && !cmd.args.empty()) {
-        targetCmd = cmd.args[0];
+        targetCmd = cmd.args[0].c_str();
     } else if (cmd.name != "help" && cmd.name != "-h" && cmd.name != "--help") {
         targetCmd = cmd.name;
     }
@@ -143,10 +149,12 @@ int CommandDispatcher::handleInit(const Command& cmd) {
     }
 
     std::cout << "Create lptv password: ";
-    std::string password = Console::getHiddenInput();
+    SecureString password;
+    Console::readSecureHiddenInput(password);
 
     std::cout << "Confirm lptv password: ";
-    std::string confirm = Console::getHiddenInput();
+    SecureString confirm;
+    Console::readSecureHiddenInput(confirm);
 
     if(password.empty()) {
         Console::printError("Password cannot be empty!");
@@ -166,7 +174,8 @@ int CommandDispatcher::handleInit(const Command& cmd) {
 
 int CommandDispatcher::handleShell(const Command& cmd) {
     std::cout << "Enter password: ";
-    std::string password = Console::getHiddenInput();        
+    SecureString password;
+    Console::readSecureHiddenInput(password);        
 
     std::pair<bool, std::array<uint8_t, 32>> res = Vault::verifyLPTV(password);
     if(!res.first) {
@@ -179,10 +188,11 @@ int CommandDispatcher::handleShell(const Command& cmd) {
     m_isShellMode = true;
     Console::printHeader("Entering Interactive Mode");
     std::cout << Console::GREY << "(type 'exit' or 'quit' to leave)" << Console::RESET << "\n\n";
-    std::string input;
+
+    SecureString input;
     while (true) {
         std::cout << Console::CYAN << "lptv> " << Console::RESET;
-        if (!std::getline(std::cin, input)) break;
+        if (!Console::readSecureInput(input)) break;
         if (input == "exit" || input == "quit") break;
         if (input.empty()) continue;
 
@@ -212,7 +222,7 @@ int CommandDispatcher::handleList(const Command& cmd) {
     if (!cmd.args.empty() && cmd.args[0] == "category") {
         lptv.listCategories();
     } else {
-        std::string category = cmd.args.empty() ? "" : cmd.args[0];
+        SecureString category = cmd.args.empty() ? "" : cmd.args[0];
         lptv.list(category);
     }
     return 0;

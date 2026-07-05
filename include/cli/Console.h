@@ -1,17 +1,20 @@
 #pragma once
-#include <string>
+#include <string/SecureString.h>
+#include <string_view>
 #include <vector>
 
 class Console{
 public:
-    static std::string getHiddenInput();
-    static void printHiddenPassword(const std::string& password);
+    static bool readSecureInput(SecureString&);
+    static bool readSecureHiddenInput(SecureString&);
+
+    static void printHiddenPassword(const SecureString& password);
 
     static void printTable(
         const std::vector<std::string>& headers,
-        const std::vector<std::vector<std::string>>& rows
+        const std::vector<std::vector<SecureString>>& rows
     );
-    static bool copyToClipboard(const std::string& text);
+    static bool copyToClipboard(const SecureString& text);
 
     // ANSI Colors
     static const std::string RESET;
@@ -25,9 +28,13 @@ public:
     static const std::string GREY;
 
     // Semantic Printing
-    static void printSuccess(const std::string& message);
-    static void printError(const std::string& message);
-    static void printWarning(const std::string& message);
-    static void printInfo(const std::string& message);
-    static void printHeader(const std::string& message);
+    static void printSuccess(std::string_view message);
+    static void printError(std::string_view message);
+    static void printWarning(std::string_view message);
+    static void printInfo(std::string_view message);
+    static void printHeader(std::string_view message);
+
+
+private:
+    static bool readLine(SecureString& out, bool echo);
 };

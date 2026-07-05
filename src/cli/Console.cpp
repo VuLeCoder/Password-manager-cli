@@ -1,10 +1,10 @@
 #include "./../../include/cli/Console.h"
+#include "string/SecureString.h"
 
 #include <conio.h>
 #include <iostream>
-#include <algorithm>
 #include <iomanip>
-#include <cstdio>
+#include <string_view>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -36,68 +36,38 @@ void enableAnsiSupport() {
 #endif
 }
 
-void Console::printSuccess(const std::string& message) {
+void Console::printSuccess(std::string_view message) {
     enableAnsiSupport();
     std::cout << GREEN << "lptv " << RESET << GREEN << "success " << RESET << message << std::endl;
 }
 
-void Console::printError(const std::string& message) {
+void Console::printError(std::string_view message) {
     enableAnsiSupport();
     std::cerr << RED << "lptv " << RESET << BOLD << RED << "ERR! " << RESET << message << std::endl;
 }
 
-void Console::printWarning(const std::string& message) {
+void Console::printWarning(std::string_view message) {
     enableAnsiSupport();
     std::cout << YELLOW << "lptv " << RESET << YELLOW << "warn " << RESET << message << std::endl;
 }
 
-void Console::printInfo(const std::string& message) {
+void Console::printInfo(std::string_view message) {
     enableAnsiSupport();
     std::cout << CYAN << "lptv " << RESET << "info " << message << std::endl;
 }
 
-void Console::printHeader(const std::string& message) {
+void Console::printHeader(std::string_view message) {
     enableAnsiSupport();
     std::cout << std::endl << BOLD << message << RESET << std::endl;
 }
 
-std::string Console::getHiddenInput() {
-    enableAnsiSupport();
-    std::string input;
-
-    while(true) {
-        int c = _getch();
-        
-        if(c == 0 || c == 0xE0) {
-            _getch();
-            continue;
-        }
-
-        if(c == '\r') {
-            std::cout << std::endl;
-            break;
-        }
-
-        if(c == '\b') {
-            if (!input.empty()) {
-                input.pop_back();
-            }
-            continue;
-        }
-
-        if(c < 32 || c > 126) continue;
-        input += static_cast<char>(c);
-    }
-    return input;
-}
-
-void Console::printHiddenPassword(const std::string& password) {
+void Console::printHiddenPassword(const SecureString& password) {
     std::cout << "***********";
 }
 
 void Console::printTable(
     const std::vector<std::string>& headers,
-    const std::vector<std::vector<std::string>>& rows
+    const std::vector<std::vector<SecureString>>& rows
 ) {
     if (headers.empty()) return;
     enableAnsiSupport();
@@ -111,7 +81,7 @@ void Console::printTable(
 
     for (const auto& row : rows) {
         for (size_t i = 0; i < numCols && i < row.size(); ++i) {
-            colWidths[i] = std::max(colWidths[i], row[i].length());
+            colWidths[i] = std::max(colWidths[i], row[i].size());
         }
     }
 
@@ -132,7 +102,7 @@ void Console::printTable(
     // Print Rows
     for (const auto& row : rows) {
         for (size_t i = 0; i < numCols; ++i) {
-            std::string val = (i < row.size()) ? row[i] : "";
+            std::string_view val = (i < row.size()) ? row[i].view() : "";
             std::cout << std::left << std::setw(colWidths[i] + 2) << val;
         }
         std::cout << std::endl;
@@ -140,7 +110,64 @@ void Console::printTable(
     std::cout << std::endl;
 }
 
-bool Console::copyToClipboard(const std::string& text) {
+// === === === === ===
+//
+// === === === === ===
+bool Console::readLine(SecureString& out, bool echo) {
+    enableAnsiSupport();
+    out.clear();
+
+    while(true) {
+        int ch = _getch();
+
+        if(ch == 26) {
+            return false;
+        }
+
+        if(ch == 0 || ch == 0xE0) {
+            _getch();
+            continue;
+        }
+
+        switch(ch) {
+        case '\r':
+            std::cout << '\n';
+            return true;
+
+        case '\b':
+            if(!out.empty()) {
+                out.pop_back();
+
+                if(echo) {
+                    std::cout << "\b \b";
+                    std::cout.flush();
+                }
+            }
+            break;
+
+        default:
+            if(ch >= 32 && ch <= 126) {
+                out.push_back(static_cast<char>(ch));
+
+                if (echo) {
+                    std::cout.put(static_cast<char>(ch));
+                    std::cout.flush();
+                }
+            }
+            break;
+        }
+    }
+}
+
+bool Console::readSecureInput(SecureString& out) {
+    return readLine(out, true);
+}
+
+bool Console::readSecureHiddenInput(SecureString& out) {
+    return readLine(out, false);
+}
+
+bool Console::copyToClipboard(const SecureString& text) {
     FILE* pipe = _popen("clip", "w");
     if (!pipe) return false;
 

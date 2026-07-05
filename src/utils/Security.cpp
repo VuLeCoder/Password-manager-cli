@@ -1,6 +1,6 @@
 #include "./../../include/utils/Security.h"
+#include "string/SecureString.h"
 
-#include <functional>
 #include <sstream>
 #include <iomanip>
 #include <argon2.h>
@@ -48,7 +48,7 @@ std::vector<uint8_t> Security::generateSalt(size_t length) {
 }
 
 std::array<uint8_t, 32> Security::deriveKey(
-    const std::string& password, 
+    const SecureString& password, 
     const std::vector<uint8_t>& salt
 ) {
     std::array<uint8_t, 32> key;

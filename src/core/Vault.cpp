@@ -1,6 +1,7 @@
 #include "./../../include/core/Vault.h"
 #include "./../../include/utils/Constants.h"
 #include "./../../include/utils/Security.h"
+#include "string/SecureString.h"
 
 #include <filesystem>
 #include <fstream>
@@ -49,7 +50,7 @@ bool Vault::hasLPTVPassword() {
     return file.peek() != EOF;
 }
 
-void Vault::setLPTVPassword(const std::string& password) {
+void Vault::setLPTVPassword(const SecureString& password) {
     auto salt = Security::generateSalt();
     auto key = Security::deriveKey(password, salt);
     auto verifier = Security::sha256(key.data(), key.size());
@@ -67,7 +68,7 @@ void Vault::setLPTVPassword(const std::string& password) {
     );
 }
 
-std::pair<bool, std::array<uint8_t, 32>> Vault::verifyLPTV(const std::string& password) {
+std::pair<bool, std::array<uint8_t, 32>> Vault::verifyLPTV(const SecureString& password) {
     std::ifstream file(Constants::MASTER_FILE, std::ios::binary);
     if(!file.is_open()) {
         return {false, {}};

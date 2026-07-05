@@ -1,41 +1,41 @@
 #pragma once
-#include <string>
+#include <string/SecureString.h>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
 class Account {
 private:
-    std::string service;
-    std::string username;
-    std::string password;
-    std::string category;
-    std::string note;
+    SecureString service;
+    SecureString username;
+    SecureString password;
+    SecureString category;
+    SecureString note;
 
 public:
     Account() = default;
 
     Account(
-        const std::string& service,
-        const std::string& username,
-        const std::string& password,
-        const std::string& category,
-        const std::string& note
+        const SecureString& service,
+        const SecureString& username,
+        const SecureString& password,
+        const SecureString& category,
+        const SecureString& note
     );
 
     Account(const Account& other);
 
-    const std::string& getService() const;
-    const std::string& getUsername() const;
-    const std::string& getPassword() const;
-    const std::string& getCategory() const;
-    const std::string& getNote() const;
+    const SecureString& getService() const;
+    const SecureString& getUsername() const;
+    const SecureString& getPassword() const;
+    const SecureString& getCategory() const;
+    const SecureString& getNote() const;
 
-    void setService(const std::string& service);
-    void setUsername(const std::string& username);
-    void setPassword(const std::string& password);
-    void setCategory(const std::string& category);
-    void setNote(const std::string& note);
+    void setService(const SecureString& service);
+    void setUsername(const SecureString& username);
+    void setPassword(const SecureString& password);
+    void setCategory(const SecureString& category);
+    void setNote(const SecureString& note);
 };
 
 inline void to_json(json& j, const Account& a) {

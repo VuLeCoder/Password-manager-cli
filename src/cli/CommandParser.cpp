@@ -1,5 +1,6 @@
 #include "./../../include/cli/CommandParser.h"
-#include <sstream>
+#include "string/SecureString.h"
+#include <cstddef>
 
 Command CommandParser::parse(int argc, char* argv[]) {
     Command cmd;
@@ -13,17 +14,25 @@ Command CommandParser::parse(int argc, char* argv[]) {
     return cmd;
 }
 
-Command CommandParser::parse(const std::string& input) {
+Command CommandParser::parse(const SecureString& input) {
     Command cmd;
-    std::stringstream ss(input);
-    std::string part;
 
-    if (ss >> part) {
-        cmd.name = part;
+    size_t i = 0;
+    size_t n = input.size();
+
+    while(i < n && std::isspace(static_cast<unsigned char>(input[i]))) ++i;
+    while(i < n && !std::isspace(static_cast<unsigned char>(input[i]))) {
+        cmd.name.push_back(input[i++]);
     }
 
-    while (ss >> part) {
-        cmd.args.push_back(part);
+    while(i < n) {
+        while(i < n && std::isspace(static_cast<unsigned char>(input[i]))) ++i;
+
+        SecureString part;
+        while(i < n && !std::isspace(static_cast<unsigned char>(input[i]))) {
+            part.push_back(input[i++]);
+        }
+        if(!part.empty()) cmd.args.push_back(std::move(part));
     }
 
     return cmd;

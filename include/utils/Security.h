@@ -1,7 +1,8 @@
 #pragma once
+#include <string/SecureString.h>
 #include <cstdint>
-#include <string>
 #include <array>
+#include <string>
 #include <vector>
 
 class Security {
@@ -19,7 +20,7 @@ public:
     static std::vector<uint8_t> generateSalt(size_t length = 16);
 
     static std::array<uint8_t, 32> deriveKey(
-        const std::string& password,
+        const SecureString& password,
         const std::vector<uint8_t>& salt
     );
 
