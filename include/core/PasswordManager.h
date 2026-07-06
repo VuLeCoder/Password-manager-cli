@@ -23,6 +23,6 @@ public:
 private:
     Account* findAccount(const SecureString& service);
     const Account* findAccount(const SecureString& service) const;
-    bool save();
+    void save();
     Account inputAccount(const SecureString& service);
 };

@@ -1,9 +1,10 @@
 #include "./../../include/core/PasswordManager.h"
-#include "./../../include/storage/Storage.h"
+#include "./../../include/storage/BinaryStorage.h"
 #include "./../../include/utils/Constants.h"
 #include "./../../include/cli/Console.h"
-#include "string/SecureString.h"
+#include "./../../include/exception/StorageException.h"
 
+#include "string/SecureString.h"
 #include <iostream>
 #include <limits>
 #include <algorithm>
@@ -37,8 +38,8 @@ const Account* PasswordManager::findAccount(const SecureString& service) const {
     return nullptr;
 }
 
-bool PasswordManager::save() {
-    return Storage::save({accounts, categories}, Constants::VAULT_DB);
+void PasswordManager::save() {
+    BinaryStorage::save({accounts, categories}, Constants::VAULT_DB);
 }
 
 Account PasswordManager::inputAccount(const SecureString& service) {
@@ -107,7 +108,7 @@ Account PasswordManager::inputAccount(const SecureString& service) {
 
 // === === public === ===
 PasswordManager::PasswordManager() {
-    VaultData data = Storage::load(Constants::VAULT_DB);
+    VaultData data = BinaryStorage::load(Constants::VAULT_DB);
     accounts = data.accounts;
     categories = data.categories;
 }
@@ -137,13 +138,15 @@ void PasswordManager::addCategory(const SecureString& category) {
     }
 
     categories.push_back(category);
-    if (save()) {
-        SecureString msg("Category '");
-        msg += category; msg += "' added.";
-        Console::printSuccess(msg.view());
-    } else {
+    try {
+        save();
+    } catch(const StorageException& e) {
         Console::printError("Failed to save category.");
     }
+
+    SecureString msg("Category '");
+    msg += category; msg += "' added.";
+    Console::printSuccess(msg.view());
 }
 
 void PasswordManager::removeCategory(const SecureString& category) {
@@ -153,13 +156,16 @@ void PasswordManager::removeCategory(const SecureString& category) {
 
     if (it != categories.end()) {
         categories.erase(it);
-        if (save()) {
-            SecureString msg("Category '");
-            msg += category; msg += "' removed.";
-            Console::printSuccess(msg.view());
-        } else {
-            Console::printError("Failed to save categories.");
+        try {
+            save();
+        } catch(const StorageException& e) {
+            Console::printError("Failed to save category.");
         }
+
+        SecureString msg("Category '");
+        msg += category; msg += "' removed.";
+        Console::printSuccess(msg.view());
+
     } else {
         SecureString msg("Category '");
         msg += category; msg += "' not found.";
@@ -261,11 +267,12 @@ void PasswordManager::add(const SecureString& service) {
     Account acc = inputAccount(service);
     accounts.emplace_back(acc);
 
-    if(save()) {
-        Console::printSuccess("Account saved.");
-        return;
+    try {
+        save();
+    } catch(const StorageException& e) {
+        Console::printError("Failed to save account.");
     }
-    Console::printError("Failed to save account.");
+    Console::printSuccess("Account saved.");
 }
 
 void PasswordManager::update(const SecureString& service) {
@@ -281,11 +288,12 @@ void PasswordManager::update(const SecureString& service) {
     existsAcc->setCategory(acc.getCategory());
     existsAcc->setNote(acc.getNote());
 
-    if(save()) {
-        Console::printSuccess("Account updated.");
-        return;
+    try {
+        save();
+    } catch(const StorageException& e) {
+        Console::printError("Failed to update account.");
     }
-    Console::printError("Failed to update account.");
+    Console::printSuccess("Account updated.");
 }
 
 void PasswordManager::get(const SecureString& service, bool isHiddenPassword) const {
@@ -332,12 +340,12 @@ void PasswordManager::remove(const SecureString& service) {
     ) {
         if(it->getService() == service) {
             accounts.erase(it);
-
-            if(save()) {
-                Console::printSuccess("Account deleted.");
-                return;
+            try {
+                save();
+            } catch(const StorageException& e) {
+                Console::printError("Failed to delete account.");
             }
-            Console::printError("Failed to delete account.");
+            Console::printSuccess("Account deleted.");
             return;
         }
     }

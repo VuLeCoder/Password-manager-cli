@@ -15,7 +15,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(ARGON2 REQUIRED libargon2)
 pkg_check_modules(OPENSSL REQUIRED openssl)
-find_package(nlohmann_json REQUIRED)
 
 # Source files
 set(SOURCES
@@ -31,7 +30,9 @@ set(SOURCES
     src/core/SessionContext.cpp
     src/core/Vault.cpp
 
-    src/storage/Storage.cpp
+    src/storage/BinaryStorage.cpp
+    src/storage/BinaryReader.cpp
+    src/storage/BinaryWriter.cpp
     
     src/utils/Encryptor.cpp
     src/utils/Security.cpp
@@ -50,7 +51,7 @@ set(HEADERS
     include/core/SessionContext.h
     include/core/Vault.h
 
-    include/storage/Storage.h
+    include/storage/BinaryStorage.h
     
     include/utils/Constants.h
     include/utils/Encryptor.h
@@ -82,7 +83,6 @@ target_link_libraries(
     SecureString
     ${ARGON2_LIBRARIES}
     ${OPENSSL_LIBRARIES}
-    nlohmann_json::nlohmann_json
     crypt32
     ws2_32
     bcrypt
