@@ -1,121 +1,133 @@
-#include "./../../include/utils/Encryptor.h"
-#include "./../../include/utils/Security.h"
+#include "exception/EncryptException.h"
+#include "utils/Encryptor.h"
 
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 
-bool Encryptor::encrypt(
-    const std::vector<uint8_t>& plaintext,
-    const uint8_t* key,
-    const uint8_t* nonce,
-    std::vector<uint8_t>& ciphertext,
-    std::array<uint8_t, 16>& tag
+EncryptResult Encryptor::encrypt(
+    const SecureBuffer& plaintext,
+    const uint8_t* key
 ) {
-    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    EncryptResult result;
+    generateRandomNonce(result.nonce);
 
-    if(!ctx) return false;
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if(!ctx) {
+        throw EncryptException(EncryptCode::ContextError, "Failed to create cipher context.");
+    }
+
+    result.ciphertext.resize(plaintext.size());
 
     int len = 0;
-    ciphertext.resize(plaintext.size());
+    int ciphertextLen = 0;
 
-    bool success = false;
-
-    do {
+    try {
         if(EVP_EncryptInit_ex(
                 ctx,
                 EVP_aes_256_gcm(),
                 nullptr,
                 nullptr,
-                nullptr) != 1)
-            break;
+                nullptr) != 1
+        ) 
+            throw EncryptException(EncryptCode::EncryptError, "EncryptInit failed.");
 
         if(EVP_CIPHER_CTX_ctrl(
                 ctx,
                 EVP_CTRL_GCM_SET_IVLEN,
-                12,
-                nullptr) != 1)
-            break;
+                result.nonce.size(),
+                nullptr) != 1
+        )
+            throw EncryptException(EncryptCode::EncryptError, "Failed to set nonce length.");
 
         if(EVP_EncryptInit_ex(
                 ctx,
                 nullptr,
                 nullptr,
                 key,
-                nonce) != 1)
-            break;
+                result.nonce.data()) != 1
+        )
+            throw EncryptException(EncryptCode::EncryptError, "Failed to initialize key.");
 
         if(EVP_EncryptUpdate(
                 ctx,
-                ciphertext.data(),
+                result.ciphertext.data(),
                 &len,
                 plaintext.data(),
-                static_cast<int>(plaintext.size())) != 1)
-            break;
+                static_cast<int>(plaintext.size())) != 1
+        )
+            throw EncryptException(EncryptCode::EncryptError, "EncryptUpdate failed.");
 
-        int ciphertext_len = len;
+        ciphertextLen = len;
 
-        if (EVP_EncryptFinal_ex(
+        if(EVP_EncryptFinal_ex(
                 ctx,
-                ciphertext.data() + len,
-                &len) != 1)
-            break;
+                result.ciphertext.data() + len,
+                &len) != 1
+        )
+            throw EncryptException(EncryptCode::EncryptError, "EncryptFinal failed.");
 
-        ciphertext_len += len;
+        ciphertextLen += len;
 
-        ciphertext.resize(ciphertext_len);
+        result.ciphertext.resize(ciphertextLen);
 
-        if (EVP_CIPHER_CTX_ctrl(
+        if(EVP_CIPHER_CTX_ctrl(
                 ctx,
                 EVP_CTRL_GCM_GET_TAG,
-                16,
-                tag.data()) != 1)
-            break;
-
-        success = true;
-
-    } while (false);
+                result.tag.size(),
+                result.tag.data()) != 1
+        )
+            throw EncryptException(EncryptCode::EncryptError, "Failed to get authentication tag.");
+    }
+    catch (...) {
+        EVP_CIPHER_CTX_free(ctx);
+        throw;
+    }
 
     EVP_CIPHER_CTX_free(ctx);
-    return success;
+
+    return result;
 }
 
-bool Encryptor::decrypt(
-    const std::vector<uint8_t>& ciphertext,
+SecureBuffer Encryptor::decrypt(
+    const SecureBuffer& ciphertext,
     const uint8_t* key,
-    const uint8_t* nonce,
-    const uint8_t* tag,
-    std::vector<uint8_t>& plaintext
+    const std::array<uint8_t,12>& nonce,
+    const std::array<uint8_t,16>& tag
 ) {
+    SecureBuffer plaintext(ciphertext.size());
+
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
-    if(!ctx) return false;
+    if(!ctx) {
+        throw EncryptException(EncryptCode::ContextError, "Failed to create cipher context.");
+    }
 
     int len = 0;
-    plaintext.resize(ciphertext.size());
-    bool success = false;
+    int plaintextLen = 0;
 
-    do {
+    try {
         if(EVP_DecryptInit_ex(
                 ctx,
                 EVP_aes_256_gcm(),
                 nullptr,
                 nullptr,
                 nullptr) != 1)
-            break;
+            throw EncryptException(EncryptCode::DecryptError, "DecryptInit failed.");
 
         if(EVP_CIPHER_CTX_ctrl(
                 ctx,
                 EVP_CTRL_GCM_SET_IVLEN,
-                12,
+                nonce.size(),
                 nullptr) != 1)
-            break;
+            throw EncryptException(EncryptCode::DecryptError, "Failed to set nonce length.");
 
         if(EVP_DecryptInit_ex(
                 ctx,
                 nullptr,
                 nullptr,
                 key,
-                nonce) != 1)
-            break;
+                nonce.data()) != 1)
+            throw EncryptException(EncryptCode::DecryptError, "Failed to initialize key.");
 
         if(EVP_DecryptUpdate(
                 ctx,
@@ -123,31 +135,42 @@ bool Encryptor::decrypt(
                 &len,
                 ciphertext.data(),
                 static_cast<int>(ciphertext.size())) != 1)
-            break;
+            throw EncryptException(EncryptCode::DecryptError, "DecryptUpdate failed.");
 
-        int plaintext_len = len;
+        plaintextLen = len;
 
         if(EVP_CIPHER_CTX_ctrl(
                 ctx,
                 EVP_CTRL_GCM_SET_TAG,
-                16,
-                const_cast<uint8_t*>(tag)) != 1)
-            break;
+                tag.size(),
+                const_cast<uint8_t*>(tag.data())) != 1)
+            throw EncryptException(EncryptCode::DecryptError, "Failed to set authentication tag.");
 
-        int ret = EVP_DecryptFinal_ex(
-            ctx,
-            plaintext.data() + len,
-            &len
-        );
+        if(EVP_DecryptFinal_ex(
+                ctx,
+                plaintext.data() + len,
+                &len) != 1)
+            throw EncryptException(EncryptCode::DecryptError, "Authentication failed.");
 
-        if(ret <= 0) break;
+        plaintextLen += len;
 
-        plaintext_len += len;
-        plaintext.resize(plaintext_len);
-        success = true;
-
-    } while (false);
+        plaintext.resize(plaintextLen);
+    }
+    catch (...) {
+        EVP_CIPHER_CTX_free(ctx);
+        throw;
+    }
 
     EVP_CIPHER_CTX_free(ctx);
-    return success;
+
+    return plaintext;
+}
+
+void Encryptor::generateRandomNonce(std::array<uint8_t,12>& nonce) {
+    if(RAND_bytes(nonce.data(), static_cast<int>(nonce.size())) != 1){
+        throw EncryptException(
+            EncryptCode::RandomGenerationFailed,
+            "Failed to generate random nonce."
+        );
+    }
 }

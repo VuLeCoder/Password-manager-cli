@@ -1,8 +1,11 @@
-#include "./../../include/storage/BinaryStorage.h"
-#include "./../../include/storage/BinaryWriter.h"
-#include "./../../include/storage/BinaryReader.h"
-#include "./../../include/exception/StorageException.h"
+#include "core/SessionContext.h"
+#include "exception/StorageException.h"
+#include "storage/BinaryStorage.h"
+#include "storage/BinaryWriter.h"
+#include "storage/BinaryReader.h"
+#include "storage/BinaryFormat.h"
 #include "storage/VaultData.h"
+#include "utils/Encryptor.h"
 
 #include <fstream>
 
@@ -27,6 +30,18 @@ void BinaryStorage::saveDraft(
     const VaultData& vaultData,
     const fs::path& tempPath
 ) {
+    BinaryWriter writer;
+    writer.writeVault(vaultData);
+
+    SecureBuffer plaintext = writer.takeBuffer();
+
+    EncryptResult encryptRes = Encryptor::encrypt(
+        plaintext,
+        SessionContext::get().getKey().data()
+    );
+
+    plaintext.clear();
+
     std::ofstream file(tempPath, std::ios::binary);
     if(!file.is_open()) {
         throw StorageException(
@@ -35,15 +50,9 @@ void BinaryStorage::saveDraft(
         );
     }
 
-    BinaryWriter writer;
-    writer.writeVault(vaultData);
-
-    SecureBuffer buffer = writer.takeBuffer();
-
-    file.write(
-        reinterpret_cast<const char*>(buffer.data()),
-        static_cast<std::streamsize>(buffer.size())
-    );
+    file.write(reinterpret_cast<char*>(encryptRes.nonce.data()), encryptRes.nonce.size());
+    file.write(reinterpret_cast<char*>(encryptRes.tag.data()), encryptRes.tag.size());
+    file.write(reinterpret_cast<char*>(encryptRes.ciphertext.data()), encryptRes.ciphertext.size());
 
     if (!file) {
         throw StorageException(
@@ -98,6 +107,20 @@ VaultData BinaryStorage::load(const fs::path& path) {
     file.read(reinterpret_cast<char*>(buffer.data()), size);
     file.close();
 
-    BinaryReader reader(buffer);
+    std::array<uint8_t, 12> nonce;
+    std::array<uint8_t, 16> tag;
+
+    std::copy(buffer.begin(), buffer.begin() + 12, nonce.begin());
+    std::copy(buffer.begin() + 12, buffer.begin() + 28, tag.begin());
+
+    SecureBuffer ciphertext(buffer.begin() + 28, buffer.end());
+
+    SecureBuffer plaintext = Encryptor::decrypt(
+        ciphertext,
+        SessionContext::get().getKey().data(),
+        nonce, tag
+    );
+
+    BinaryReader reader(plaintext);
     return reader.readVault();
 }
