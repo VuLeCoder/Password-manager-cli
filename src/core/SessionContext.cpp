@@ -1,6 +1,4 @@
-#include "./../../include/core/SessionContext.h"
-#include <algorithm>
-#include <cstring>
+#include "core/SessionContext.h"
 #include <openssl/crypto.h>
 
 SessionContext& SessionContext::get() {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./PasswordManagerException.h"
+#include "PasswordManagerException.h"
 
 enum class StorageCode{
     Unknown,

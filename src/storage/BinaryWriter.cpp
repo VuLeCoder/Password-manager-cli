@@ -1,5 +1,5 @@
-#include "./../../include/storage/BinaryFormat.h"
-#include "./../../include/storage/BinaryWriter.h"
+#include "storage/BinaryFormat.h"
+#include "storage/BinaryWriter.h"
 
 #include <cstring>
 

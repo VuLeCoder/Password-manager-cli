@@ -1,5 +1,5 @@
 #pragma once
-#include "./Account.h"
+#include "Account.h"
 #include <vector>
 
 class PasswordManager {

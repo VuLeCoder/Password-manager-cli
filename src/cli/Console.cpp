@@ -1,4 +1,4 @@
-#include "./../../include/cli/Console.h"
+#include "cli/Console.h"
 #include "string/SecureString.h"
 
 #include <conio.h>

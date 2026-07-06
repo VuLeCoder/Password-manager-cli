@@ -1,5 +1,5 @@
-#include "./../../include/core/AuthGuard.h"
-#include "./../../include/core/SessionContext.h"
+#include "core/AuthGuard.h"
+#include "core/SessionContext.h"
 
 bool AuthGuard::verify() {
     return SessionContext::get().isActive();

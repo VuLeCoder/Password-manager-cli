@@ -1,8 +1,8 @@
-#include "./../../include/core/PasswordManager.h"
-#include "./../../include/storage/BinaryStorage.h"
-#include "./../../include/utils/Constants.h"
-#include "./../../include/cli/Console.h"
-#include "./../../include/exception/StorageException.h"
+#include "core/PasswordManager.h"
+#include "storage/BinaryStorage.h"
+#include "utils/Constants.h"
+#include "cli/Console.h"
+#include "exception/StorageException.h"
 
 #include "string/SecureString.h"
 #include <iostream>

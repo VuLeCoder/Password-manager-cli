@@ -1,4 +1,4 @@
-#include "./../../include/cli/CommandParser.h"
+#include "cli/CommandParser.h"
 #include "string/SecureString.h"
 #include <cstddef>
 

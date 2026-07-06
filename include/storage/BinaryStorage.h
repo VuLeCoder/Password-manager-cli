@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./VaultData.h"
+#include "VaultData.h"
 #include <filesystem>
 
 namespace fs = std::filesystem;

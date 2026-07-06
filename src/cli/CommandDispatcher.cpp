@@ -1,10 +1,10 @@
-#include "./../../include/cli/CommandDispatcher.h"
-#include "./../../include/cli/Console.h"
-#include "./../../include/cli/CommandParser.h"
+#include "cli/CommandDispatcher.h"
+#include "cli/Console.h"
+#include "cli/CommandParser.h"
 
-#include "./../../include/core/AuthGuard.h"
-#include "./../../include/core/PasswordManager.h"
-#include "./../../include/core/Vault.h"
+#include "core/AuthGuard.h"
+#include "core/PasswordManager.h"
+#include "core/Vault.h"
 #include "string/SecureString.h"
 
 #include <iostream>

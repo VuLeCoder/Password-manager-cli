@@ -1,4 +1,4 @@
-#include "./../../include/core/Account.h"
+#include "core/Account.h"
 
 Account::Account(
     const SecureString& service,

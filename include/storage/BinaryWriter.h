@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./BinaryFormat.h"
+#include "BinaryFormat.h"
 #include "VaultData.h"
 #include "core/Account.h"
 #include "string/SecureString.h"

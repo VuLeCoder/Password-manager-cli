@@ -1,5 +1,5 @@
 #pragma once
-#include "./../core/Account.h"
+#include "core/Account.h"
 #include <vector>
 
 struct VaultData {
