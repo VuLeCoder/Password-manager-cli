@@ -9,4 +9,7 @@ using SecureBuffer = std::vector<uint8_t, SecureAllocator<uint8_t>>;
 namespace BinaryFormat {
     constexpr uint32_t MAGIC = 311;
     constexpr uint32_t VERSION = 1;
+
+    constexpr size_t NONCE_SIZE = 12;
+    constexpr size_t TAG_SIZE = 16;
 }

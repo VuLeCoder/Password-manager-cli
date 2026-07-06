@@ -35,10 +35,12 @@ void BinaryWriter::writeAccount(const Account& a) {
     writeSecureString(a.getNote());
 }
 
-void BinaryWriter::writeVault(const VaultData& v) {
+void BinaryWriter::writeHeader() {
     writeUint32(BinaryFormat::MAGIC);
     writeUint32(BinaryFormat::VERSION);
+}
 
+void BinaryWriter::writeVault(const VaultData& v) {
     writeUint32(static_cast<uint32_t>(v.categories.size()));
     for(const SecureString& cat : v.categories) {
         writeSecureString(cat);

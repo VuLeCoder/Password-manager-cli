@@ -1,8 +1,15 @@
 #pragma once
 
-#include "./BinaryFormat.h"
-#include "./../core/Account.h"
-#include "./VaultData.h"
+#include "BinaryFormat.h"
+#include "core/Account.h"
+#include "VaultData.h"
+#include <array>
+
+struct RawFile{
+    std::array<uint8_t, BinaryFormat::NONCE_SIZE> nonce;
+    std::array<uint8_t, BinaryFormat::TAG_SIZE> tag;
+    SecureBuffer ciphertext;
+};
 
 class BinaryReader{
 private:
@@ -18,5 +25,6 @@ private:
 
 public:
     explicit BinaryReader(const SecureBuffer&);
+    RawFile readHeader();
     VaultData readVault();
 };

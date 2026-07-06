@@ -1,5 +1,6 @@
-#include "./../../include/storage/BinaryReader.h"
-#include "./../../include/exception/StorageException.h"
+#include "storage/BinaryReader.h"
+#include "exception/StorageException.h"
+#include "storage/BinaryFormat.h"
 
 void BinaryReader::require(std::size_t n) {
     if(n > size_ - cursor_) {
@@ -56,7 +57,7 @@ BinaryReader::BinaryReader(const SecureBuffer& buffer) {
     cursor_ = 0;
 }
 
-VaultData BinaryReader::readVault() {
+RawFile BinaryReader::readHeader() {
     uint32_t magic = readUint32();
     if(magic != BinaryFormat::MAGIC) {
         throw StorageException(
@@ -73,6 +74,25 @@ VaultData BinaryReader::readVault() {
         );
     }
 
+    RawFile rFile;
+    
+    require(BinaryFormat::NONCE_SIZE);
+    std::copy(data_ + cursor_, data_ + cursor_ + BinaryFormat::NONCE_SIZE, rFile.nonce.begin());
+    cursor_ += BinaryFormat::NONCE_SIZE;
+
+    require(BinaryFormat::TAG_SIZE);
+    std::copy(data_ + cursor_, data_ + cursor_ + BinaryFormat::TAG_SIZE, rFile.tag.begin());
+    cursor_ += BinaryFormat::TAG_SIZE;
+
+    rFile.ciphertext.assign(
+        data_ + cursor_,
+        data_ + size_
+    );
+
+    return rFile;
+}
+
+VaultData BinaryReader::readVault() {
     VaultData vaultData;
 
     size_t size = readUint32();

@@ -19,5 +19,6 @@ private:
 
 public:
     void writeVault(const VaultData&);
+    void writeHeader();
     SecureBuffer takeBuffer();
 };

@@ -50,6 +50,14 @@ void BinaryStorage::saveDraft(
         );
     }
 
+    {
+        BinaryWriter headerWriter;
+        headerWriter.writeHeader();
+
+        SecureBuffer header = headerWriter.takeBuffer();
+        file.write(reinterpret_cast<char*>(header.data()), header.size());
+    }
+
     file.write(reinterpret_cast<char*>(encryptRes.nonce.data()), encryptRes.nonce.size());
     file.write(reinterpret_cast<char*>(encryptRes.tag.data()), encryptRes.tag.size());
     file.write(reinterpret_cast<char*>(encryptRes.ciphertext.data()), encryptRes.ciphertext.size());
@@ -107,18 +115,13 @@ VaultData BinaryStorage::load(const fs::path& path) {
     file.read(reinterpret_cast<char*>(buffer.data()), size);
     file.close();
 
-    std::array<uint8_t, 12> nonce;
-    std::array<uint8_t, 16> tag;
-
-    std::copy(buffer.begin(), buffer.begin() + 12, nonce.begin());
-    std::copy(buffer.begin() + 12, buffer.begin() + 28, tag.begin());
-
-    SecureBuffer ciphertext(buffer.begin() + 28, buffer.end());
+    BinaryReader encryptReader(buffer);
+    RawFile r = encryptReader.readHeader();
 
     SecureBuffer plaintext = Encryptor::decrypt(
-        ciphertext,
+        r.ciphertext,
         SessionContext::get().getKey().data(),
-        nonce, tag
+        r.nonce, r.tag
     );
 
     BinaryReader reader(plaintext);
