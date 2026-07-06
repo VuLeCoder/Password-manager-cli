@@ -81,7 +81,7 @@ void CommandParser::validateInit(const Command& cmd) {
 
     throw CommandException(
         CommandCode::Invalid,
-        "Invalid usage.\nRun 'lptv" + cmd.name + "-h' for help."
+        "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
 
@@ -92,7 +92,7 @@ void CommandParser::validateStatus(const Command& cmd) {
 
     throw CommandException(
         CommandCode::Invalid,
-        "Invalid usage.\nRun 'lptv" + cmd.name + "-h' for help."
+        "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
 
@@ -103,7 +103,7 @@ void CommandParser::validateShell(const Command& cmd) {
 
     throw CommandException(
         CommandCode::Invalid,
-        "Invalid usage.\nRun 'lptv" + cmd.name + "-h' for help."
+        "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
 
@@ -121,7 +121,7 @@ void CommandParser::validateAdd(const Command& cmd) {
 
     throw CommandException(
         CommandCode::Invalid,
-        "Invalid usage.\nRun 'lptv" + cmd.name + "-h' for help."
+        "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
 
@@ -132,7 +132,7 @@ void CommandParser::validateList(const Command& cmd) {
 
     throw CommandException(
         CommandCode::Invalid,
-        "Invalid usage.\nRun 'lptv" + cmd.name + "-h' for help."
+        "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
 
@@ -143,7 +143,7 @@ void CommandParser::validateGet(const Command& cmd) {
 
     throw CommandException(
         CommandCode::Invalid,
-        "Invalid usage.\nRun 'lptv" + cmd.name + "-h' for help."
+        "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
 
@@ -160,7 +160,7 @@ void CommandParser::validateDelete(const Command& cmd) {
 
     throw CommandException(
         CommandCode::Invalid,
-        "Invalid usage.\nRun 'lptv" + cmd.name + "-h' for help."
+        "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
 
@@ -171,7 +171,7 @@ void CommandParser::validateUpdate(const Command& cmd) {
 
     throw CommandException(
         CommandCode::Invalid,
-        "Invalid usage.\nRun 'lptv" + cmd.name + "-h' for help."
+        "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
 
@@ -182,6 +182,6 @@ void CommandParser::validateSearch(const Command& cmd) {
 
     throw CommandException(
         CommandCode::Invalid,
-        "Invalid usage.\nRun 'lptv" + cmd.name + "-h' for help."
+        "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
