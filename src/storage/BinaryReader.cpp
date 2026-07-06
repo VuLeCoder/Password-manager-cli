@@ -1,7 +1,12 @@
 #include "./../../include/storage/BinaryReader.h"
+#include "./../../include/exception/StorageException.h"
 
 void BinaryReader::require(std::size_t n) {
     if(cursor_ + n > size_) {
+        throw StorageException(
+            StorageCode::InvalidFormat,
+            "Missing something"
+        );
     }
 }
 
@@ -51,12 +56,20 @@ BinaryReader::BinaryReader(const SecureBuffer& buffer) {
 VaultData BinaryReader::readVault() {
     uint32_t magic = readUint32();
     if(magic != BinaryFormat::MAGIC) {
-
+        throw StorageException(
+            StorageCode::Unknown,
+            "Invalid magic number"
+        );
     }
 
     uint32_t version = readUint32();
     if(version != BinaryFormat::VERSION) {
-
+        throw StorageException(
+            StorageException(
+                StorageCode::UnsupportedVersion,
+                "Different versions"
+            )
+        );
     }
 
     VaultData vaultData;
