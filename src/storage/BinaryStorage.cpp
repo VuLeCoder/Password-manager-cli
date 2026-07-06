@@ -67,9 +67,14 @@ void BinaryStorage::save(
         fs::create_directory(path.parent_path());
     }
 
-    saveDraft(vaultData, tempPath);
-    replaceVault(tempPath, path);
-    fs::remove(tempPath);
+    try {
+        saveDraft(vaultData, tempPath);
+        replaceVault(tempPath, path);
+    } catch (...) {
+        std::error_code ec;
+        fs::remove(tempPath, ec);
+        throw;
+    }
 }
 
 VaultData BinaryStorage::load(const fs::path& path) {
@@ -77,21 +82,20 @@ VaultData BinaryStorage::load(const fs::path& path) {
     if(!file.is_open()) {
         throw StorageException(
             StorageCode::CannotOpenFile,
-            "Cannot open temporary vault file: " + path.string()
+            "Cannot open vault file: " + path.string()
         );
     }
 
     file.seekg(0, std::ios::end);
-    if (file.tellg() == 0) {
+    std::streamsize size = file.tellg();
+    if (size == 0) {
         file.close();
         return VaultData{};
     }
     file.seekg(0, std::ios::beg);
     
-    SecureBuffer buffer(
-        (std::istreambuf_iterator<char>(file)),
-        std::istreambuf_iterator<char>()
-    );
+    SecureBuffer buffer(size);
+    file.read(reinterpret_cast<char*>(buffer.data()), size);
     file.close();
 
     BinaryReader reader(buffer);
