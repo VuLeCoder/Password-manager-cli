@@ -6,6 +6,8 @@ enum class StorageCode{
     Unknown,
     FileNotFound,
     CannotOpenFile,
+    CannotWriteFile,
+    CannotRenameFile,
     InvalidFormat,
     UnsupportedVersion
 };
