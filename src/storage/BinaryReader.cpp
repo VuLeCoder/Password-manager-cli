@@ -2,7 +2,7 @@
 #include "./../../include/exception/StorageException.h"
 
 void BinaryReader::require(std::size_t n) {
-    if(cursor_ + n > size_) {
+    if(n > size_ - cursor_) {
         throw StorageException(
             StorageCode::InvalidFormat,
             "Missing something"
@@ -24,6 +24,9 @@ uint32_t BinaryReader::readUint32() {
 
 SecureString BinaryReader::readSecureString() {
     uint32_t length = readUint32();
+    if (length == 0) {
+        return SecureString();
+    }
     require(length);
 
     SecureString str;
@@ -65,10 +68,8 @@ VaultData BinaryReader::readVault() {
     uint32_t version = readUint32();
     if(version != BinaryFormat::VERSION) {
         throw StorageException(
-            StorageException(
-                StorageCode::UnsupportedVersion,
-                "Different versions"
-            )
+            StorageCode::UnsupportedVersion,
+            "Different versions"
         );
     }
 
