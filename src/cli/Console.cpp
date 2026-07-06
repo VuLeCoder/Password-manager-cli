@@ -2,9 +2,7 @@
 #include "string/SecureString.h"
 
 #include <conio.h>
-#include <iostream>
 #include <iomanip>
-#include <string_view>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -23,7 +21,7 @@ const std::string Console::MAGENTA = "\033[35m";
 const std::string Console::CYAN    = "\033[36m";
 const std::string Console::GREY    = "\033[90m";
 
-void enableAnsiSupport() {
+void Console::enableAnsiSupport() {
 #ifdef _WIN32
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE) return;
@@ -34,26 +32,6 @@ void enableAnsiSupport() {
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hOut, dwMode);
 #endif
-}
-
-void Console::printSuccess(std::string_view message) {
-    enableAnsiSupport();
-    std::cout << GREEN << "lptv " << RESET << GREEN << "success " << RESET << message << std::endl;
-}
-
-void Console::printError(std::string_view message) {
-    enableAnsiSupport();
-    std::cerr << RED << "lptv " << RESET << BOLD << RED << "ERR! " << RESET << message << std::endl;
-}
-
-void Console::printWarning(std::string_view message) {
-    enableAnsiSupport();
-    std::cout << YELLOW << "lptv " << RESET << YELLOW << "warn " << RESET << message << std::endl;
-}
-
-void Console::printInfo(std::string_view message) {
-    enableAnsiSupport();
-    std::cout << CYAN << "lptv " << RESET << "info " << message << std::endl;
 }
 
 void Console::printHeader(std::string_view message) {

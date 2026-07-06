@@ -2,6 +2,7 @@
 #include <string/SecureString.h>
 #include <string_view>
 #include <vector>
+#include <iostream>
 
 class Console{
 public:
@@ -28,13 +29,58 @@ public:
     static const std::string GREY;
 
     // Semantic Printing
-    static void printSuccess(std::string_view message);
-    static void printError(std::string_view message);
-    static void printWarning(std::string_view message);
-    static void printInfo(std::string_view message);
+    template<typename... Args>
+    static void printSuccess(const Args&... args);
+
+    template<typename... Args>
+    static void printError(const Args&... args);
+
+    template<typename... Args>
+    static void printWarning(const Args&... args);
+
+    template<typename... Args>
+    static void printInfo(const Args&... args);
+
     static void printHeader(std::string_view message);
 
 
 private:
+    static void enableAnsiSupport();
     static bool readLine(SecureString& out, bool echo);
 };
+
+template<typename... Args>
+void Console::printSuccess(const Args&... args) {
+    enableAnsiSupport();
+
+    std::cout << GREEN << "lptv " << RESET << GREEN << "success " << RESET;
+    (std::cout << ... << args);
+    std::cout << std::endl;
+}
+
+template<typename... Args>
+void Console::printError(const Args&... args) {
+    enableAnsiSupport();
+
+    std::cerr << RED << "lptv " << RESET << BOLD << RED << "ERR! " << RESET;
+    (std::cout << ... << args);
+    std::cout << std::endl;
+}
+
+template<typename... Args>
+void Console::printWarning(const Args&... args) {
+    enableAnsiSupport();
+
+    std::cout << YELLOW << "lptv " << RESET << YELLOW << "warn " << RESET;
+    (std::cout << ... << args);
+    std::cout << std::endl;
+}
+
+template<typename... Args>
+void Console::printInfo(const Args&... args) {
+    enableAnsiSupport();
+
+    std::cout << CYAN << "lptv " << RESET << "info ";
+    (std::cout << ... << args);
+    std::cout << std::endl;
+}
