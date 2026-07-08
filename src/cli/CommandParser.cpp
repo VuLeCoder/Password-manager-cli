@@ -54,6 +54,10 @@ Command CommandParser::parse(const SecureString& input) {
 // === === ===
 
 void CommandParser::validate(const Command& cmd) {
+    if(isHelpCmd(cmd.name) && cmd.args.empty()) {
+        return;
+    }
+
     using ValidateFunc = void(*)(const Command&);
     static const std::unordered_map<std::string, ValidateFunc> validates = {
         { "init",    validateInit    },
