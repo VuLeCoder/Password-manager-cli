@@ -1,12 +1,13 @@
 #include "cli/CommandDispatcher.h"
 #include "cli/Console.h"
 #include "cli/CommandParser.h"
+#include "cli/modules/HelpPrinter.h"
 
 #include "core/AuthGuard.h"
 #include "core/PasswordManager.h"
 #include "core/Vault.h"
-#include "string/SecureString.h"
 
+#include <string/SecureString.h>
 #include <iostream>
 #include <string_view>
 #include <unordered_map>
@@ -56,89 +57,25 @@ bool CommandDispatcher::requireService(const Command& cmd) {
 }
 
 bool CommandDispatcher::isHelp(const Command& cmd) {
-    if (cmd.name == "help" || cmd.name.empty() || cmd.name == "-h" || cmd.name == "--help") {
+    if(cmd.name == "--help" || cmd.name == "-h") {
         return true;
     }
-    for (const auto& arg : cmd.args) {
-        if (arg == "-h" || arg == "--help") {
+
+    for(const auto& arg : cmd.args) {
+        if(arg == "-h" || arg == "--help") {
             return true;
         }
     }
     return false;
 }
 
-int CommandDispatcher::handleHelp(const Command& cmd) {
-    std::string targetCmd = "";
-    if (cmd.name == "help" && !cmd.args.empty()) {
-        targetCmd = cmd.args[0].c_str();
-    } else if (cmd.name != "help" && cmd.name != "-h" && cmd.name != "--help") {
-        targetCmd = cmd.name;
+int CommandDispatcher::handleHelp(std::string_view cmdName) {
+    if(cmdName == "--help" || cmdName == "-h") {
+        HelpPrinter::printHelp("");
+        return 0;
     }
 
-    static const std::unordered_map<std::string, HelpInfo> helpMap = {
-        {"add", {
-            "Help: add",
-            "  Usage: lptv add <service>         Add a new account\n"
-            "         lptv add category <name>   Add a new category\n\n"
-        }},
-        {"list", {
-            "Help: list",
-            "  Usage: lptv list                  List all accounts\n"
-            "         lptv list <category>       List accounts in category\n"
-            "         lptv list category         List all categories\n\n"
-        }},
-        {"get", {
-            "Help: get",
-            "  Usage: lptv get <service>          Show account details and copy password\n\n"
-        }},
-        {"delete", {
-            "Help: delete",
-            "  Usage: lptv delete <service>       Remove an account\n"
-            "         lptv delete category <name> Remove a category\n\n"
-        }},
-        {"update", {
-            "Help: update",
-            "  Usage: lptv update <service>       Update account details\n\n"
-        }},
-        {"search", {
-            "Help: search",
-            "  Usage: lptv search <query>         Search accounts by service or username\n\n"
-        }},
-        {"init", {
-            "Help: init",
-            "  Usage: lptv init                   Initialize a new vault and set master password\n\n"
-        }},
-        {"status", {
-            "Help: status",
-            "  Usage: lptv status                 Check if vault is initialized and unlocked\n\n"
-        }},
-        {"shell", {
-            "Help: shell",
-            "  Usage: lptv shell                  Enter interactive shell mode\n\n"
-        }}
-    };
-
-    auto it = helpMap.find(targetCmd);
-    if (it != helpMap.end()) {
-        Console::printHeader(it->second.title);
-        std::cout << it->second.usage;
-    } else {
-        std::cout << "\nUsage: lptv <command>\n\n"
-            << "where <command> is one of:\n"
-            << "    " << Console::BOLD << "init" << Console::RESET << "       Initialize the vault\n"
-            << "    " << Console::BOLD << "status" << Console::RESET << "     Check vault status\n"
-            << "    " << Console::BOLD << "shell" << Console::RESET << "      Enter interactive mode\n"
-            << "    " << Console::BOLD << "list" << Console::RESET << "       List accounts or categories\n"
-            << "    " << Console::BOLD << "search" << Console::RESET << "     Search accounts\n"
-            << "    " << Console::BOLD << "add" << Console::RESET << "        Add an account or category\n"
-            << "    " << Console::BOLD << "update" << Console::RESET << "     Update an account\n"
-            << "    " << Console::BOLD << "get" << Console::RESET << "        Get account details\n"
-            << "    " << Console::BOLD << "delete" << Console::RESET << "     Delete an account or category\n\n"
-            << "lptv help <command>  search for help on <command>\n"
-            << "lptv <command> -h    quick help on <command>\n\n"
-            << Console::GREY << "Note: Standalone commands will auto-prompt for password if the vault is locked." << Console::RESET << "\n\n";
-    }
-
+    HelpPrinter::printHelp(cmdName);
     return 0;
 }
 
@@ -300,8 +237,13 @@ int CommandDispatcher::handleDelete(const Command& cmd) {
 
 // === === public === ===
 int CommandDispatcher::execute(const Command& cmd) {
-    if (isHelp(cmd)) {
-        return handleHelp(cmd);
+    for(const auto& ss : cmd.args) {
+        std::cout << (ss.view() == "-h");
+    }
+    std::cout << "\n\n\n";
+
+    if(isHelp(cmd)) {
+        return handleHelp(cmd.name);
     }
 
     if(cmd.name == "init") {

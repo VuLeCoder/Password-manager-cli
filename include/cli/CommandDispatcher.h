@@ -8,7 +8,8 @@ private:
     static bool requireService(const Command& cmd);
 
     static bool isHelp(const Command& cmd);
-    static int handleHelp(const Command& cmd);
+
+    static int handleHelp(std::string_view);
     static int handleInit(const Command& cmd);
     static int handleShell(const Command& cmd);
     static int handleStatus(const Command& cmd);

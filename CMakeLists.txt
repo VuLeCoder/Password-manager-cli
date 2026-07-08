@@ -24,6 +24,8 @@ set(SOURCES
     src/cli/CommandParser.cpp
     src/cli/Console.cpp
 
+    src/cli/modules/HelpPrinter.cpp
+
     src/core/Account.cpp
     src/core/AuthGuard.cpp
     src/core/PasswordManager.cpp
@@ -44,6 +46,8 @@ set(HEADERS
     include/cli/CommandDispatcher.h
     include/cli/CommandParser.h
     include/cli/Console.h
+
+    include/cli/modules/HelpPrinter.h
 
     include/core/Account.h
     include/core/AuthGuard.h
