@@ -7,6 +7,12 @@
 #include <cstddef>
 
 // === === ===
+constexpr static bool isHelpCmd(std::string_view sv) {
+    return sv == "-h" || sv == "--help";
+}
+// === === ===
+
+// === === ===
 Command CommandParser::parse(int argc, char* argv[]) {
     Command cmd;
     if(argc > 1) {
@@ -79,6 +85,10 @@ void CommandParser::validateInit(const Command& cmd) {
         return;
     }
 
+    if(cmd.args.size() == 1 && isHelpCmd(cmd.args.front().view())) {
+        return;
+    }
+
     throw CommandException(
         CommandCode::Invalid,
         "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
@@ -90,6 +100,10 @@ void CommandParser::validateStatus(const Command& cmd) {
         return;
     }
 
+    if(cmd.args.size() == 1 && isHelpCmd(cmd.args.front().view())) {
+        return;
+    }
+
     throw CommandException(
         CommandCode::Invalid,
         "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
@@ -98,6 +112,10 @@ void CommandParser::validateStatus(const Command& cmd) {
 
 void CommandParser::validateShell(const Command& cmd) {
     if(cmd.args.empty()) {
+        return;
+    }
+
+    if(cmd.args.size() == 1 && isHelpCmd(cmd.args.front().view())) {
         return;
     }
 
@@ -126,7 +144,11 @@ void CommandParser::validateAdd(const Command& cmd) {
 }
 
 void CommandParser::validateList(const Command& cmd) {
-    if(cmd.args.size() <= 1) {
+    if(cmd.args.empty()) {
+        return;
+    }
+
+    if(cmd.args.size() == 1 && isHelpCmd(cmd.args.front().view())) {
         return;
     }
 
