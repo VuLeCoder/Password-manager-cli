@@ -1,7 +1,7 @@
 #include "cli/modules/HelpPrinter.h"
 #include "cli/Console.h"
+#include "exception/CommandException.h"
 
-#include <iostream>
 #include <iomanip>
 #include <unordered_map>
 
@@ -81,9 +81,10 @@ void HelpPrinter::printCommand(std::string_view command) {
     auto it = HELP.find(command);
 
     if(it == HELP.end()) {
-        Console::printError("Unknown command: ", command);
-        std::cout << "Run " << Console::BOLD << "lptv help" << Console::RESET << " for usage.\n\n";
-        return;
+        throw CommandException(
+            CommandCode::Error,
+            "Unknown command: " + std::string(command)
+        );
     }
 
     Console::printHeader(it->second.title);
