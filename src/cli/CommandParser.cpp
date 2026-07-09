@@ -140,11 +140,11 @@ void CommandParser::validateShell(const Command& cmd) {
 void CommandParser::validateAdd(const Command& cmd) {
     const auto& args = cmd.args;
     
-    if(args.size() == 1 && args.front() != "category") {
+    if(args.size() == 1 && args.front() != "--category") {
         return;
     }
 
-    if(args.size() == 2 && args.front() == "category") {
+    if(args.size() == 2 && args.front() == "--category") {
         return;
     }
 
@@ -183,11 +183,11 @@ void CommandParser::validateGet(const Command& cmd) {
 void CommandParser::validateDelete(const Command& cmd) {
     const auto& args = cmd.args;
 
-    if(args.size() == 1 && args.front() != "category") {
+    if(args.size() == 1 && args.front() != "--category") {
         return;
     }
 
-    if(args.size() == 2 && args.front() == "category") {
+    if(args.size() == 2 && args.front() == "--category") {
         return;
     }
 

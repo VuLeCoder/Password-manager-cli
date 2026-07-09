@@ -19,16 +19,16 @@ namespace {
         {"add", {
             "Add an account or category",
             "Help: add",
-            "  Usage: lptv add <service>         Add a new account\n"
-                   "         lptv add category <name>   Add a new category\n\n"
+            "  Usage: lptv add <service>            Add a new account\n"
+                   "         lptv add --category <name>    Add a new category\n\n"
         }},
 
         {"list", {
             "List accounts or categories",
             "Help: list",
-            "  Usage: lptv list                  List all accounts\n"
-                   "         lptv list <category>       List accounts in category\n"
-                   "         lptv list category         List all categories\n\n"
+            "  Usage: lptv list                 List all accounts\n"
+                   "         lptv list <category>      List accounts in category\n"
+                   "         lptv list --category      List all categories\n\n"
         }},
 
         {"get", {
@@ -41,8 +41,8 @@ namespace {
         {"delete", {
             "Delete an account or category",
             "Help: delete",
-            "  Usage: lptv delete <service>       Remove an account\n"
-                   "         lptv delete category <name> Remove a category\n\n"
+            "  Usage: lptv delete <service>          Remove an account\n"
+                   "         lptv delete --category <name>  Remove a category\n\n"
         }},
 
         {"update", {
@@ -54,25 +54,25 @@ namespace {
         {"search", {
             "Search accounts by keyword",
             "Help: search",
-            "  Usage: lptv search <query>         Search accounts by service or username\n\n"
+            "  Usage: lptv search <query>   Search accounts by service or username\n\n"
         }},
 
         {"init", {
             "Initialize the vault",
             "Help: init",
-            "  Usage: lptv init                   Initialize a new vault and set master password\n\n"
+            "  Usage: lptv init     Initialize a new vault and set master password\n\n"
         }},
 
         {"status", {
             "Check vault status",
             "Help: status",
-            "  Usage: lptv status                 Check if vault is initialized and unlocked\n\n"
+            "  Usage: lptv status   Check if vault is initialized and unlocked\n\n"
         }},
 
         {"shell", {
             "Enter interactive mode",
             "Help: shell",
-            "  Usage: lptv shell                  Enter interactive shell mode\n\n"
+            "  Usage: lptv shell    Enter interactive shell mode\n\n"
         }},
 
         {"generate", {
@@ -101,7 +101,7 @@ namespace {
         {"change-password", {
             "Change master password",
             "Help: change-password",
-            "  Usage: lptv change-password               Change your vault's master password\n\n"
+            "  Usage: lptv change-password      Change your vault's master password\n\n"
         }}
     };
 };

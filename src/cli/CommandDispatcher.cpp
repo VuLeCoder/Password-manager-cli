@@ -141,7 +141,7 @@ void CommandDispatcher::handleList(const Command& cmd) {
     requireUnlock();
     PasswordManager lptv;
 
-    if(!cmd.args.empty() && cmd.args.front() == "category") {
+    if(!cmd.args.empty() && cmd.args.front() == "--category") {
         lptv.listCategories();
         return;
     }
@@ -160,7 +160,7 @@ void CommandDispatcher::handleAdd(const Command& cmd) {
     requireUnlock();
     PasswordManager lptv;
 
-    if(cmd.args.front() == "category") {
+    if(cmd.args.front() == "--category") {
         lptv.addCategory(cmd.args[1]);
         return;
     }
@@ -185,7 +185,7 @@ void CommandDispatcher::handleDelete(const Command& cmd) {
     requireUnlock();
     PasswordManager lptv;
 
-    if(cmd.args.front() == "category") {
+    if(cmd.args.front() == "--category") {
         lptv.removeCategory(cmd.args[1]);
         return;
     }
