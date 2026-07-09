@@ -7,12 +7,6 @@
 #include <cstddef>
 
 // === === ===
-constexpr static bool isHelpCmd(std::string_view sv) {
-    return sv == "-h" || sv == "--help";
-}
-// === === ===
-
-// === === ===
 Command CommandParser::parse(int argc, char* argv[]) {
     Command cmd;
     if(argc > 1) {
@@ -54,11 +48,17 @@ Command CommandParser::parse(const SecureString& input) {
 // === === ===
 
 void CommandParser::validate(const Command& cmd) {
-    if (cmd.name.empty()) {
+    if(cmd.name.empty()) {
         return;
     }
 
-    if(isHelpCmd(cmd.name) && cmd.args.empty()) {
+    if(CommandCheck::isHelp(cmd.name)) {
+        if(!cmd.args.empty()) {
+            throw CommandException(
+                CommandCode::Unknown, 
+                "Unknown command: " + std::string(cmd.args.front().view())
+            );
+        }
         return;
     }
 
@@ -94,7 +94,7 @@ void CommandParser::validateInit(const Command& cmd) {
         return;
     }
 
-    if(cmd.args.size() == 1 && isHelpCmd(cmd.args.front().view())) {
+    if(cmd.args.size() == 1 && CommandCheck::isHelp(cmd.args.front().view())) {
         return;
     }
 
@@ -109,7 +109,7 @@ void CommandParser::validateStatus(const Command& cmd) {
         return;
     }
 
-    if(cmd.args.size() == 1 && isHelpCmd(cmd.args.front().view())) {
+    if(cmd.args.size() == 1 && CommandCheck::isHelp(cmd.args.front().view())) {
         return;
     }
 
@@ -124,7 +124,7 @@ void CommandParser::validateShell(const Command& cmd) {
         return;
     }
 
-    if(cmd.args.size() == 1 && isHelpCmd(cmd.args.front().view())) {
+    if(cmd.args.size() == 1 && CommandCheck::isHelp(cmd.args.front().view())) {
         return;
     }
 
@@ -134,15 +134,14 @@ void CommandParser::validateShell(const Command& cmd) {
     );
 }
 
-
 void CommandParser::validateAdd(const Command& cmd) {
     const auto& args = cmd.args;
     
-    if(args.size() == 1 && args.front() != "--category") {
+    if(args.size() == 1 && !CommandCheck::isCategory(args.front().view())) {
         return;
     }
 
-    if(args.size() == 2 && args.front() == "--category") {
+    if(args.size() == 2 && CommandCheck::isCategory(args.front().view())) {
         return;
     }
 
@@ -181,11 +180,11 @@ void CommandParser::validateGet(const Command& cmd) {
 void CommandParser::validateDelete(const Command& cmd) {
     const auto& args = cmd.args;
 
-    if(args.size() == 1 && args.front() != "--category") {
+    if(args.size() == 1 && !CommandCheck::isCategory(args.front().view())) {
         return;
     }
 
-    if(args.size() == 2 && args.front() == "--category") {
+    if(args.size() == 2 && CommandCheck::isCategory(args.front().view())) {
         return;
     }
 

@@ -3,6 +3,18 @@
 
 #include <string/SecureString.h>
 
+namespace CommandCheck {
+    bool isList(std::string_view);
+    bool isGenerate(std::string_view);
+
+    bool isHelp(std::string_view);
+    bool isCategory(std::string_view);
+    bool isNoUpper(std::string_view);
+    bool isNoLower(std::string_view);
+    bool isNoDigits(std::string_view);
+    bool isNoSpecial(std::string_view);
+};
+
 class CommandParser {
 public:
     static Command parse(int argc, char* argv[]);

@@ -20,6 +20,38 @@ struct HelpInfo {
     std::string title;
     std::string usage;
 };
+
+bool CommandCheck::isList(std::string_view sv) {
+    return sv == cmd::LIST || sv == "ls";
+}
+
+bool CommandCheck::isGenerate(std::string_view sv) {
+    return sv == cmd::GENERATE || sv == "gen";
+}
+
+bool CommandCheck::isHelp(std::string_view sv) {
+    return sv == "--help" || sv == "-h";
+}
+
+bool CommandCheck::isCategory(std::string_view sv) {
+    return sv == "--category" || sv == "-c";
+}
+
+bool CommandCheck::isNoUpper(std::string_view sv) {
+    return sv == "--no-upper" || sv == "-u";
+}
+
+bool CommandCheck::isNoLower(std::string_view sv) {
+    return sv == "--no-lower" || sv == "-l";
+}
+
+bool CommandCheck::isNoDigits(std::string_view sv) {
+    return sv == "--no-digits" || sv == "-d";
+}
+
+bool CommandCheck::isNoSpecial(std::string_view sv) {
+    return sv == "--no-special" || sv == "-s";
+}
 // === === === === === ===
 
 // === === private === ===
@@ -42,12 +74,12 @@ void CommandDispatcher::requireUnlock() {
 }
 
 bool CommandDispatcher::isHelp(const Command& cmd) {
-    if(cmd.name == "--help" || cmd.name == "-h") {
+    if(CommandCheck::isHelp(cmd.name)) {
         return true;
     }
 
     for(const auto& arg : cmd.args) {
-        if(arg == "-h" || arg == "--help") {
+        if(CommandCheck::isHelp(arg.view())) {
             return true;
         }
     }
@@ -56,7 +88,7 @@ bool CommandDispatcher::isHelp(const Command& cmd) {
 
 // === handler
 void CommandDispatcher::handleHelp(std::string_view cmdName) {
-    if(cmdName == "--help" || cmdName == "-h") {
+    if(CommandCheck::isHelp(cmdName)) {
         HelpPrinter::printHelp("");
         return;
     }
@@ -148,7 +180,7 @@ void CommandDispatcher::handleList(const Command& cmd) {
         return;
     }
 
-    if(cmd.args.front() == "--category" || cmd.args.front() == "-c") {
+    if(CommandCheck::isCategory(cmd.args.front().view())) {
         lptv.listCategories();
         return;
     }
@@ -164,7 +196,7 @@ void CommandDispatcher::handleAdd(const Command& cmd) {
     requireUnlock();
     PasswordManager lptv;
 
-    if(cmd.args.front() == "--category") {
+    if(CommandCheck::isCategory(cmd.args.front().view())) {
         lptv.addCategory(cmd.args[1]);
         return;
     }
@@ -189,7 +221,7 @@ void CommandDispatcher::handleDelete(const Command& cmd) {
     requireUnlock();
     PasswordManager lptv;
 
-    if(cmd.args.front() == "--category" || cmd.args.front() == "-c") {
+    if(CommandCheck::isCategory(cmd.args.front().view())) {
         lptv.removeCategory(cmd.args[1]);
         return;
     }
@@ -203,14 +235,14 @@ void CommandDispatcher::handleGenerate(const Command& cmd) {
     bool useDigits = true;
     bool useSpecial = true;
 
-    for (const auto& arg : cmd.args) {
-        if (arg == "--no-upper" || arg == "-u") {
+    for(const auto& arg : cmd.args) {
+        if(CommandCheck::isNoUpper(arg.view())) {
             useUpper = false;
-        } else if (arg == "--no-lower" || arg == "-l") {
+        } else if(CommandCheck::isNoLower(arg.view())) {
             useLower = false;
-        } else if (arg == "--no-digits" || arg == "-d") {
+        } else if(CommandCheck::isNoDigits(arg.view())) {
             useDigits = false;
-        } else if (arg == "--no-special" || arg == "-s") {
+        } else if(CommandCheck::isNoSpecial(arg.view())) {
             useSpecial = false;
         } else {
             try {
