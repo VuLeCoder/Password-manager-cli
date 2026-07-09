@@ -3,5 +3,7 @@
 
 int main(int argc, char* argv[]){
     auto command = CommandParser::parse(argc, argv);
-    return CommandDispatcher::execute(command);
+    CommandDispatcher::execute(command);
+    
+    return 0;
 }
