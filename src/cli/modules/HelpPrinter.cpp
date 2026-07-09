@@ -151,21 +151,6 @@ void HelpPrinter::printGeneral() {
         << "when the vault is locked."
         << Console::RESET
         << "\n\n";
-
-    // std::cout << "\nUsage: lptv <command>\n\n"
-    //     << "where <command> is one of:\n"
-    //     << "    " << Console::BOLD << "init" << Console::RESET << "       Initialize the vault\n"
-    //     << "    " << Console::BOLD << "status" << Console::RESET << "     Check vault status\n"
-    //     << "    " << Console::BOLD << "shell" << Console::RESET << "      Enter interactive mode\n"
-    //     << "    " << Console::BOLD << "list" << Console::RESET << "       List accounts or categories\n"
-    //     << "    " << Console::BOLD << "search" << Console::RESET << "     Search accounts\n"
-    //     << "    " << Console::BOLD << "add" << Console::RESET << "        Add an account or category\n"
-    //     << "    " << Console::BOLD << "update" << Console::RESET << "     Update an account\n"
-    //     << "    " << Console::BOLD << "get" << Console::RESET << "        Get account details\n"
-    //     << "    " << Console::BOLD << "delete" << Console::RESET << "     Delete an account or category\n\n"
-    //     << "lptv help <command>  search for help on <command>\n"
-    //     << "lptv <command> -h    quick help on <command>\n\n"
-    //     << Console::GREY << "Note: Standalone commands will auto-prompt for password if the vault is locked." << Console::RESET << "\n\n";
 }
 
 void HelpPrinter::printHelp(std::string_view command) {
