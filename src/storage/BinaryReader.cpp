@@ -6,7 +6,7 @@ void BinaryReader::require(std::size_t n) {
     if(n > size_ - cursor_) {
         throw StorageException(
             StorageCode::InvalidFormat,
-            "Missing something"
+            "Premature end of vault data: corrupted or truncated file."
         );
     }
 }
@@ -61,7 +61,7 @@ RawFile BinaryReader::readHeader() {
     uint32_t magic = readUint32();
     if(magic != BinaryFormat::MAGIC) {
         throw StorageException(
-            StorageCode::Unknown,
+            StorageCode::InvalidFormat,
             "Invalid magic number"
         );
     }
