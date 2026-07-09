@@ -92,6 +92,13 @@ void BinaryStorage::save(
 }
 
 VaultData BinaryStorage::load(const fs::path& path) {
+    if (!fs::exists(path)) {
+        throw StorageException(
+            StorageCode::FileNotFound,
+            "Vault file not found: " + path.string()
+        );
+    }
+
     std::ifstream file(path, std::ios::binary);
     if(!file.is_open()) {
         throw StorageException(
