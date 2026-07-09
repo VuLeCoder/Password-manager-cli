@@ -54,6 +54,10 @@ Command CommandParser::parse(const SecureString& input) {
 // === === ===
 
 void CommandParser::validate(const Command& cmd) {
+    if (cmd.name.empty()) {
+        return;
+    }
+
     if(isHelpCmd(cmd.name) && cmd.args.empty()) {
         return;
     }
