@@ -4,7 +4,7 @@
 
 enum class CommandCode{
     Unknown,
-    Invalid,
+    Error,
 };
 
 class CommandException : public PasswordManagerException {
