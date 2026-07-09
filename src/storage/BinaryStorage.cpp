@@ -19,6 +19,9 @@ void BinaryStorage::replaceVault(
     try {
         fs::rename(tempPath, finalPath);
     } catch (const fs::filesystem_error& e) {
+        std::error_code ec;
+        fs::remove(tempPath, ec);
+
         throw StorageException(
             StorageCode::CannotRenameFile,
             std::string("Cannot rename file: ") + e.what()
@@ -62,7 +65,7 @@ void BinaryStorage::saveDraft(
     file.write(reinterpret_cast<char*>(encryptRes.tag.data()), encryptRes.tag.size());
     file.write(reinterpret_cast<char*>(encryptRes.ciphertext.data()), encryptRes.ciphertext.size());
 
-    if (!file) {
+    if(!file) {
         throw StorageException(
             StorageCode::CannotWriteFile,
             "Failed to write vault file: " + tempPath.string()
@@ -84,14 +87,8 @@ void BinaryStorage::save(
         fs::create_directory(path.parent_path());
     }
 
-    try {
-        saveDraft(vaultData, tempPath);
-        replaceVault(tempPath, path);
-    } catch (...) {
-        std::error_code ec;
-        fs::remove(tempPath, ec);
-        throw;
-    }
+    saveDraft(vaultData, tempPath);
+    replaceVault(tempPath, path);
 }
 
 VaultData BinaryStorage::load(const fs::path& path) {
@@ -105,7 +102,7 @@ VaultData BinaryStorage::load(const fs::path& path) {
 
     file.seekg(0, std::ios::end);
     std::streamsize size = file.tellg();
-    if (size == 0) {
+    if(size == 0) {
         file.close();
         return VaultData{};
     }

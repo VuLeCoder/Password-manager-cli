@@ -2,13 +2,8 @@
 #include "storage/BinaryStorage.h"
 #include "utils/Constants.h"
 #include "cli/Console.h"
-#include "exception/StorageException.h"
 
-#include "string/SecureString.h"
-#include <iostream>
-#include <limits>
 #include <algorithm>
-#include <cctype>
 
 static SecureString toLower(SecureString s) {
     for(size_t i=0; i<s.size(); ++i) {
@@ -138,11 +133,7 @@ void PasswordManager::addCategory(const SecureString& category) {
     }
 
     categories.push_back(category);
-    try {
-        save();
-    } catch(const StorageException& e) {
-        Console::printError("Failed to save category.");
-    }
+    save();
 
     SecureString msg("Category '");
     msg += category; msg += "' added.";
@@ -156,21 +147,18 @@ void PasswordManager::removeCategory(const SecureString& category) {
 
     if (it != categories.end()) {
         categories.erase(it);
-        try {
-            save();
-        } catch(const StorageException& e) {
-            Console::printError("Failed to save category.");
-        }
+        save();
 
         SecureString msg("Category '");
         msg += category; msg += "' removed.";
         Console::printSuccess(msg.view());
 
-    } else {
-        SecureString msg("Category '");
-        msg += category; msg += "' not found.";
-        Console::printSuccess(msg.view());
+        return;
     }
+
+    SecureString msg("Category '");
+    msg += category; msg += "' not found.";
+    Console::printSuccess(msg.view());
 }
 
 void PasswordManager::search(const SecureString& query) const {
@@ -266,19 +254,15 @@ void PasswordManager::add(const SecureString& service) {
     
     Account acc = inputAccount(service);
     accounts.emplace_back(acc);
+    save();
 
-    try {
-        save();
-    } catch(const StorageException& e) {
-        Console::printError("Failed to save account.");
-    }
     Console::printSuccess("Account saved.");
 }
 
 void PasswordManager::update(const SecureString& service) {
     Account* existsAcc = findAccount(service);
     if(existsAcc == nullptr) {
-        Console::printError("Account not found.");
+        Console::printWarning("Account not found.");
         return;
     }
 
@@ -288,18 +272,15 @@ void PasswordManager::update(const SecureString& service) {
     existsAcc->setCategory(acc.getCategory());
     existsAcc->setNote(acc.getNote());
 
-    try {
-        save();
-    } catch(const StorageException& e) {
-        Console::printError("Failed to update account.");
-    }
+    save();
+
     Console::printSuccess("Account updated.");
 }
 
 void PasswordManager::get(const SecureString& service, bool isHiddenPassword) const {
     const Account* account = findAccount(service);
     if(account == nullptr) {
-        Console::printError("Account not found.");
+        Console::printWarning("Account not found.");
         return;
     }
 
@@ -323,12 +304,9 @@ void PasswordManager::get(const SecureString& service, bool isHiddenPassword) co
     std::cin >> choice;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    if (choice == 'y' || choice == 'Y') {
-        if (Console::copyToClipboard(account->getPassword())) {
-            Console::printSuccess("Password copied to clipboard!");
-        } else {
-            Console::printError("Failed to copy password.");
-        }
+    if(choice == 'y' || choice == 'Y') {
+        Console::copyToClipboard(account->getPassword());
+        Console::printSuccess("Password copied to clipboard!");
     }
 }
 
@@ -340,15 +318,12 @@ void PasswordManager::remove(const SecureString& service) {
     ) {
         if(it->getService() == service) {
             accounts.erase(it);
-            try {
-                save();
-            } catch(const StorageException& e) {
-                Console::printError("Failed to delete account.");
-            }
+            save();
+
             Console::printSuccess("Account deleted.");
             return;
         }
     }
 
-    Console::printError("Account not found.");
+    Console::printWarning("Account not found.");
 }
