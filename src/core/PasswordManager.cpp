@@ -163,7 +163,7 @@ void PasswordManager::removeCategory(const SecureString& category) {
 
     SecureString msg("Category '");
     msg += category; msg += "' not found.";
-    Console::printSuccess(msg.view());
+    Console::printWarning(msg.view());
 }
 
 void PasswordManager::search(const SecureString& query) const {
