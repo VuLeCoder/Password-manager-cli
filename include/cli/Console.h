@@ -15,6 +15,7 @@ public:
         const std::vector<std::string>& headers,
         const std::vector<std::vector<SecureString>>& rows
     );
+
     static bool copyToClipboard(const SecureString& text);
 
     // ANSI Colors
@@ -33,14 +34,12 @@ public:
     static void printSuccess(const Args&... args);
 
     template<typename... Args>
-    static void printError(const Args&... args);
-
-    template<typename... Args>
     static void printWarning(const Args&... args);
 
     template<typename... Args>
     static void printInfo(const Args&... args);
 
+    static void printError(std::string_view message);
     static void printHeader(std::string_view message);
 
 
@@ -54,15 +53,6 @@ void Console::printSuccess(const Args&... args) {
     enableAnsiSupport();
 
     std::cout << GREEN << "lptv " << RESET << GREEN << "success " << RESET;
-    (std::cout << ... << args);
-    std::cout << std::endl;
-}
-
-template<typename... Args>
-void Console::printError(const Args&... args) {
-    enableAnsiSupport();
-
-    std::cerr << RED << "lptv " << RESET << BOLD << RED << "ERR! " << RESET;
     (std::cout << ... << args);
     std::cout << std::endl;
 }

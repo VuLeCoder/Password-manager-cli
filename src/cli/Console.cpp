@@ -39,6 +39,14 @@ void Console::printHeader(std::string_view message) {
     std::cout << std::endl << BOLD << message << RESET << std::endl;
 }
 
+void Console::printError(std::string_view sv) {
+    enableAnsiSupport();
+
+    std::cerr << RED << "lptv " << RESET << BOLD << RED << "ERR! " << RESET;
+    std::cout << sv;
+    std::cout << std::endl;
+}
+
 void Console::printHiddenPassword(const SecureString& password) {
     std::cout << "***********";
 }
