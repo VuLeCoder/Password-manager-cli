@@ -17,6 +17,7 @@ Command CommandParser::parse(int argc, char* argv[]) {
         cmd.args.push_back(argv[i]);
     }
 
+    cmd.name = parse(cmd.name);
     validate(cmd);
     return cmd;
 }
@@ -42,10 +43,19 @@ Command CommandParser::parse(const SecureString& input) {
         if(!part.empty()) cmd.args.push_back(std::move(part));
     }
 
+    cmd.name = parse(cmd.name);
     validate(cmd);
     return cmd;
 }
 // === === ===
+
+std::string CommandParser::parse(const std::string& cmdName) {
+    if(CommandCheck::isList(cmdName)) return std::string(cmd::LIST);
+    if(CommandCheck::isGenerate(cmdName)) return std::string(cmd::GENERATE);
+    if(CommandCheck::isChangePassword(cmdName)) return std::string(cmd::CHANGE_PASS);
+
+    return cmdName;
+}
 
 void CommandParser::validate(const Command& cmd) {
     if(cmd.name.empty()) {

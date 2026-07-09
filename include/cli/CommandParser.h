@@ -6,6 +6,7 @@
 namespace CommandCheck {
     bool isList(std::string_view);
     bool isGenerate(std::string_view);
+    bool isChangePassword(std::string_view);
 
     bool isHelp(std::string_view);
     bool isCategory(std::string_view);
@@ -21,6 +22,7 @@ public:
     static Command parse(const SecureString& input);
 
 private:
+    static std::string parse(const std::string&);
     static void validate(const Command&);
 
     static void validateInit(const Command&);

@@ -29,6 +29,10 @@ bool CommandCheck::isGenerate(std::string_view sv) {
     return sv == cmd::GENERATE || sv == "gen";
 }
 
+bool CommandCheck::isChangePassword(std::string_view sv) {
+    return sv == cmd::CHANGE_PASS || sv == "cpw";
+}
+
 bool CommandCheck::isHelp(std::string_view sv) {
     return sv == "--help" || sv == "-h";
 }
