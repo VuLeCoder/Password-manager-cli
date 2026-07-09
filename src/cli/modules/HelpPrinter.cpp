@@ -21,29 +21,35 @@ namespace {
             "Add an account or category",
             "Help: add",
             "  Usage: lptv add <service>            Add a new account\n"
-                   "         lptv add --category <name>    Add a new category\n\n"
+                   "         lptv add [options] <name>     Add a new category\n"
+                   "  Options:\n"
+                   "    -c, --category      Specify category mode\n\n"
         }},
 
         {cmd::LIST, {
             "List accounts or categories",
-            "Help: list",
-            "  Usage: lptv list                 List all accounts\n"
-                   "         lptv list <category>      List accounts in category\n"
-                   "         lptv list --category      List all categories\n\n"
+            "Help: list (ls)",
+            "  Usage: lptv list | ls [category]     List accounts (optionally in a category)\n"
+                   "         lptv list | ls [options]      List all categories\n"
+                   "  Options:\n"
+                   "    -c, --category      List categories instead of accounts\n\n"
         }},
 
         {cmd::GET, {
             "Get account details",
             "Help: get",
-            "  Usage: lptv get <service>          Show account details\n"
-                   "         lptv get <service> --show   Show account details and password\n\n"
+            "  Usage: lptv get <service> [options]  Show account details\n"
+                   "  Options:\n"
+                   "    --show              Show the password in plain text\n\n"
         }},
 
         {cmd::DELETE, {
             "Delete an account or category",
             "Help: delete",
             "  Usage: lptv delete <service>          Remove an account\n"
-                   "         lptv delete --category <name>  Remove a category\n\n"
+                   "         lptv delete [options] <name>   Remove a category\n"
+                   "  Options:\n"
+                   "    -c, --category      Specify category mode\n\n"
         }},
 
         {cmd::UPDATE, {
@@ -78,8 +84,8 @@ namespace {
 
         {cmd::GENERATE, {
             "Generate a secure random password",
-            "Help: generate",
-            "  Usage: lptv generate [length] [options]  Generate a random password\n"
+            "Help: generate (gen)",
+            "  Usage: lptv generate | gen [length] [options]  Generate a random password\n"
                    "  Options:\n"
                    "    -u, --no-upper      Exclude uppercase letters\n"
                    "    -l, --no-lower      Exclude lowercase letters\n"
@@ -89,8 +95,8 @@ namespace {
 
         {cmd::CHANGE_PASS, {
             "Change master password",
-            "Help: change-password",
-            "  Usage: lptv change-password      Change your vault's master password\n\n"
+            "Help: change-password (cpw)",
+            "  Usage: lptv change-password | cpw      Change your vault's master password\n\n"
         }}
     };
 };
@@ -121,11 +127,20 @@ void HelpPrinter::printGeneral() {
         if (!info.showInGeneral) {
             continue;
         }
+        std::string displayCmd(command);
+        if (command == cmd::LIST) {
+            displayCmd = "list (ls)";
+        } else if (command == cmd::GENERATE) {
+            displayCmd = "generate (gen)";
+        } else if (command == cmd::CHANGE_PASS) {
+            displayCmd = "change-password (cpw)";
+        }
+
         std::cout
             << "  "
             << Console::BOLD
-            << std::left << std::setw(16)
-            << command
+            << std::left << std::setw(24)
+            << displayCmd
             << Console::RESET
             << info.description
             << '\n';

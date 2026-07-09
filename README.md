@@ -56,34 +56,50 @@ Sau khi hoàn thành, file thực thi **`lptv.exe`** sẽ được tạo ra tron
 
 ## 💡 Các lệnh nổi bật & Cách sử dụng
 
-### 1. `lptv init` (Khởi tạo Vault)
-Khởi tạo cơ sở dữ liệu mật khẩu mới và thiết lập Master Password để bảo vệ toàn bộ dữ liệu.
-*   *Cách dùng:* `lptv init`
-
-### 2. `lptv shell` (Interactive Shell - Khuyên dùng)
+### 1. `lptv shell` (Interactive Shell - Khuyên dùng)
 Vào chế độ shell tương tác giúp thực thi các lệnh tiếp theo cực nhanh mà không cần gõ tiền tố `lptv`. 
-> 🔒 **Bảo mật:** Shell sẽ tự động kết thúc phiên làm việc và đóng chương trình sau **5 phút** kể từ lúc mở.
+> 🔒 **Bảo mật:** Shell sẽ tự động kết thúc phiên làm việc và đóng chương trình sau **1 phút** kể từ lúc mở.
 *   *Cách dùng:* `lptv shell`
 
-### 3. `lptv add` (Thêm tài khoản mới)
-Thêm một tài khoản đăng nhập cho một dịch vụ. Chương trình sẽ nhắc bạn nhập Username, Password, Danh mục và Ghi chú một cách bảo mật.
-*   *Cách dùng:* `lptv add <tên_dịch_vụ>`
-*   *Thêm danh mục mới:* `lptv add --category <tên_danh_mục>`
+### 4. `lptv add` (Thêm tài khoản/danh mục)
+Thêm một tài khoản đăng nhập cho một dịch vụ. Chương trình sẽ nhắc bạn nhập các thông tin một cách bảo mật.
+*   *Thêm tài khoản:* `lptv add <tên_dịch_vụ>`
+*   *Thêm danh mục mới:* `lptv add -c <tên_danh_mục>` hoặc `lptv add --category <tên_danh_mục>`
 
-### 4. `lptv get` (Truy xuất mật khẩu & Copy nhanh)
+### 5. `lptv list` hoặc `lptv ls` (Liệt kê tài khoản/danh mục)
+Liệt kê danh sách các tài khoản hoặc danh mục hiện có.
+*   *Liệt kê tài khoản:* `lptv list` hoặc `lptv ls`
+*   *Liệt kê theo danh mục:* `lptv list <tên_danh_mục>` hoặc `lptv ls <tên_danh_mục>`
+*   *Liệt kê tất cả danh mục:* `lptv list -c` hoặc `lptv ls -c` (hoặc dùng `--category`)
+
+### 6. `lptv get` (Truy xuất mật khẩu & Copy nhanh)
 Xem thông tin chi tiết tài khoản của một dịch vụ. 
 *   *Xem mật khẩu ẩn (mặc định):* `lptv get <tên_dịch_vụ>`
 *   *Hiện mật khẩu dạng text:* `lptv get <tên_dịch_vụ> --show`
 *   *Sao chép nhanh:* Chương trình sẽ hỏi bạn có muốn copy mật khẩu vào Clipboard hay không. Nếu đồng ý, mật khẩu sẽ tự động bị xóa khỏi bộ nhớ tạm sau **30 giây**.
 
-### 5. `lptv search` (Tìm kiếm thông minh)
+### 7. `lptv update` (Cập nhật tài khoản)
+Cập nhật thông tin tài khoản của một dịch vụ đã có sẵn.
+*   *Cách dùng:* `lptv update <tên_dịch_vụ>`
+
+### 8. `lptv delete` (Xóa tài khoản/danh mục)
+Xóa tài khoản của một dịch vụ hoặc một danh mục.
+*   *Xóa tài khoản:* `lptv delete <tên_dịch_vụ>`
+*   *Xóa danh mục:* `lptv delete -c <tên_danh_mục>` hoặc `lptv delete --category <tên_danh_mục>`
+
+### 9. `lptv search` (Tìm kiếm tài khoản)
 Tìm kiếm tài khoản dựa trên từ khóa khớp với tên dịch vụ, tên đăng nhập hoặc danh mục.
 *   *Cách dùng:* `lptv search <từ_khóa>`
 
-### 6. `lptv generate` (Tạo mật khẩu cực mạnh)
+### 10. `lptv generate` hoặc `lptv gen` (Tạo mật khẩu cực mạnh)
 Tự động sinh một chuỗi mật khẩu ngẫu nhiên, an toàn với độ dài và các bộ ký tự tùy biến.
-*   *Tạo mật khẩu 20 ký tự:* `lptv generate 20`
-*   *Tạo mật khẩu không bao gồm ký tự đặc biệt:* `lptv generate 16 --no-special`
+*   *Tạo mật khẩu 20 ký tự:* `lptv generate 20` hoặc `lptv gen 20`
+*   *Tùy chọn tạo mật khẩu:* 
+    *   `-u`, `--no-upper`: Loại bỏ chữ hoa.
+    *   `-l`, `--no-lower`: Loại bỏ chữ thường.
+    *   `-d`, `--no-digits`: Loại bỏ chữ số.
+    *   `-s`, `--no-special`: Loại bỏ ký tự đặc biệt.
+    *   *Ví dụ:* `lptv gen 16 -s` (tạo mật khẩu 16 ký tự không có ký tự đặc biệt).
 
 ---
 
