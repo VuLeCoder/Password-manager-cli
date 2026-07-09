@@ -148,11 +148,7 @@ void CommandParser::validateAdd(const Command& cmd) {
 }
 
 void CommandParser::validateList(const Command& cmd) {
-    if(cmd.args.empty()) {
-        return;
-    }
-
-    if(cmd.args.size() == 1 && isHelpCmd(cmd.args.front().view())) {
+    if(cmd.args.size() <= 1) {
         return;
     }
 
@@ -163,9 +159,14 @@ void CommandParser::validateList(const Command& cmd) {
 }
 
 void CommandParser::validateGet(const Command& cmd) {
-    if(cmd.args.size() == 1) {
+    if(cmd.args.size() == 1 && cmd.args.front() != "--show") {
         return;
     }
+
+    if(cmd.args.size() == 2 && cmd.args.back() == "--show") {
+        return;
+    }
+
 
     throw CommandException(
         CommandCode::Error,
