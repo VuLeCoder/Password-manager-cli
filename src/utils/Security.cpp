@@ -1,5 +1,6 @@
 #include "utils/Security.h"
 #include "string/SecureString.h"
+#include "exception/EncryptException.h"
 
 #include <sstream>
 #include <iomanip>
@@ -42,7 +43,10 @@ std::vector<uint8_t> Security::generateSalt(size_t length) {
     
     std::vector<uint8_t> salt(length);
     if(RAND_bytes(salt.data(), static_cast<int>(salt.size())) != 1) {
-        throw std::runtime_error("Failed to generate random salt using OpenSSL RAND_bytes");
+        throw EncryptException(
+            EncryptCode::RandomGenerationFailed,
+            "Failed to generate random salt using OpenSSL RAND_bytes"
+        );
     }
     return salt;
 }
@@ -61,8 +65,9 @@ std::array<uint8_t, 32> Security::deriveKey(
     );
 
     if(res != ARGON2_OK) {
-        throw std::runtime_error(
-            argon2_error_message(res)
+        throw EncryptException(
+            EncryptCode::EncryptError,
+            std::string("Key derivation failed: ") + argon2_error_message(res)
         );
     }
     return key;
