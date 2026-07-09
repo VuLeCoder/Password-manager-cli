@@ -232,6 +232,10 @@ void CommandParser::validateChangePassword(const Command& cmd) {
         return;
     }
 
+    if(cmd.args.size() == 1 && CommandCheck::isHelp(cmd.args.front().view())) {
+        return;
+    }
+
     throw CommandException(
         CommandCode::Error,
         "Command '" + cmd.name + "' does not take arguments.\nRun 'lptv " + cmd.name + " -h' for help."
