@@ -8,6 +8,7 @@
 #include "core/Vault.h"
 
 #include "exception/CommandException.h"
+#include "utils/Security.h"
 
 #include <unordered_map>
 
@@ -181,6 +182,75 @@ void CommandDispatcher::handleDelete(const Command& cmd) {
     }
     lptv.remove(cmd.args[0]);
 }
+
+void CommandDispatcher::handleGenerate(const Command& cmd) {
+    size_t length = 16;
+    bool useUpper = true;
+    bool useLower = true;
+    bool useDigits = true;
+    bool useSpecial = true;
+
+    for (const auto& arg : cmd.args) {
+        if (arg == "--no-upper" || arg == "-u") {
+            useUpper = false;
+        } else if (arg == "--no-lower" || arg == "-l") {
+            useLower = false;
+        } else if (arg == "--no-digits" || arg == "-d") {
+            useDigits = false;
+        } else if (arg == "--no-special" || arg == "-s") {
+            useSpecial = false;
+        } else {
+            try {
+                int len = std::stoi(std::string(arg.view()));
+                if (len > 0) {
+                    length = static_cast<size_t>(len);
+                } else {
+                    throw CommandException(CommandCode::Error, "Password length must be greater than 0.");
+                }
+            } catch (...) {
+                throw CommandException(CommandCode::Error, "Invalid argument: " + std::string(arg.view()));
+            }
+        }
+    }
+
+    try {
+        SecureString password = Security::generatePassword(length, useUpper, useLower, useDigits, useSpecial);
+        std::cout << "\n  Generated Password : " << Console::GREEN << password.view() << Console::RESET << "\n\n";
+        if (Console::copyToClipboard(password)) {
+            Console::printSuccess("Password copied to clipboard! (will be cleared automatically after 30 seconds)");
+        } else {
+            Console::printWarning("Failed to copy password to clipboard.");
+        }
+    } catch (const std::exception& e) {
+        throw CommandException(CommandCode::Error, e.what());
+    }
+}
+
+void CommandDispatcher::handleChangePassword(const Command& cmd) {
+    requireUnlock();
+    PasswordManager lptv;
+
+    std::cout << Console::BOLD << "  Enter new master password" << Console::RESET << ": ";
+    SecureString password;
+    Console::readSecureHiddenInput(password);
+
+    std::cout << Console::BOLD << "  Confirm new master password" << Console::RESET << ": ";
+    SecureString confirm;
+    Console::readSecureHiddenInput(confirm);
+
+    if (password.empty()) {
+        throw CommandException(CommandCode::Error, "Password cannot be empty!");
+    }
+
+    if (!password.equals(confirm)) {
+        throw CommandException(CommandCode::Error, "Passwords do not match.");
+    }
+
+    lptv.changeMasterPassword(password);
+    Console::printSuccess("Master password changed successfully.");
+}
+
+
 // ===
 // === === === === === ===
 
@@ -214,7 +284,10 @@ void CommandDispatcher::execute(const Command& cmd) {
         { "add",    handleAdd       },
         { "update", handleUpdate    },
         { "get",    handleGet       },
-        { "delete", handleDelete    }
+        { "delete", handleDelete    },
+        { "generate", handleGenerate },
+        { "gen",      handleGenerate },
+        { "change-password", handleChangePassword }
     };
 
     auto it = handlers.find(cmd.name);

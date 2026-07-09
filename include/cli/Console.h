@@ -16,7 +16,7 @@ public:
         const std::vector<std::vector<SecureString>>& rows
     );
 
-    static bool copyToClipboard(const SecureString& text);
+    static bool copyToClipboard(const SecureString& text, int delaySeconds = 30);
 
     // ANSI Colors
     static const std::string RESET;

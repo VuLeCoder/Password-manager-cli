@@ -21,4 +21,6 @@ private:
     static void validateDelete(const Command&);
     static void validateUpdate(const Command&);
     static void validateSearch(const Command&);
+    static void validateGenerate(const Command&);
+    static void validateChangePassword(const Command&);
 };

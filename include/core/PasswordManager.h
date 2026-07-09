@@ -19,6 +19,7 @@ public:
     void update(const SecureString& service);
     void get(const SecureString& service, bool isHiddenPassword) const;
     void remove(const SecureString& service);
+    void changeMasterPassword(const SecureString& newPassword);
 
 private:
     Account* findAccount(const SecureString& service);

@@ -74,6 +74,9 @@ void CommandParser::validate(const Command& cmd) {
         { "delete",  validateDelete  },
         { "update",  validateUpdate  },
         { "search",  validateSearch  },
+        { "generate", validateGenerate },
+        { "gen",      validateGenerate },
+        { "change-password", validateChangePassword }
     };
 
     auto it = validates.find(cmd.name);
@@ -215,3 +218,26 @@ void CommandParser::validateSearch(const Command& cmd) {
         "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
+
+void CommandParser::validateGenerate(const Command& cmd) {
+    if(cmd.args.size() <= 5) {
+        return;
+    }
+
+    throw CommandException(
+        CommandCode::Error,
+        "Too many arguments.\nRun 'lptv " + cmd.name + " -h' for help."
+    );
+}
+
+void CommandParser::validateChangePassword(const Command& cmd) {
+    if(cmd.args.empty()) {
+        return;
+    }
+
+    throw CommandException(
+        CommandCode::Error,
+        "Command '" + cmd.name + "' does not take arguments.\nRun 'lptv " + cmd.name + " -h' for help."
+    );
+}
+

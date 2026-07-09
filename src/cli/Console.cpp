@@ -153,11 +153,21 @@ bool Console::readSecureHiddenInput(SecureString& out) {
     return readLine(out, false);
 }
 
-bool Console::copyToClipboard(const SecureString& text) {
+bool Console::copyToClipboard(const SecureString& text, int delaySeconds) {
     FILE* pipe = _popen("clip", "w");
     if (!pipe) return false;
 
     fprintf(pipe, "%s", text.c_str());
     _pclose(pipe);
+
+    if (delaySeconds > 0) {
+        std::string cmd = "start /b powershell -WindowStyle Hidden -Command \"Start-Sleep -Seconds " 
+                          + std::to_string(delaySeconds) 
+                          + "; cmd.exe /c 'type nul | clip'\"";
+        FILE* clearPipe = _popen(cmd.c_str(), "w");
+        if (clearPipe) {
+            _pclose(clearPipe);
+        }
+    }
     return true;
 }

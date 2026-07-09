@@ -19,6 +19,14 @@ public:
 
     static std::vector<uint8_t> generateSalt(size_t length = 16);
 
+    static SecureString generatePassword(
+        size_t length = 16,
+        bool useUpper = true,
+        bool useLower = true,
+        bool useDigits = true,
+        bool useSpecial = true
+    );
+
     static std::array<uint8_t, 32> deriveKey(
         const SecureString& password,
         const std::vector<uint8_t>& salt

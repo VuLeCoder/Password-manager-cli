@@ -73,6 +73,35 @@ namespace {
             "Enter interactive mode",
             "Help: shell",
             "  Usage: lptv shell                  Enter interactive shell mode\n\n"
+        }},
+
+        {"generate", {
+            "Generate a secure random password",
+            "Help: generate",
+            "  Usage: lptv generate [length] [options]  Generate a random password\n"
+                   "  Options:\n"
+                   "    -u, --no-upper      Exclude uppercase letters\n"
+                   "    -l, --no-lower      Exclude lowercase letters\n"
+                   "    -d, --no-digits     Exclude digits\n"
+                   "    -s, --no-special    Exclude special characters\n\n"
+        }},
+
+        {"gen", {
+            "Generate a secure random password",
+            "Help: generate",
+            "  Usage: lptv generate [length] [options]  Generate a random password\n"
+                   "  Options:\n"
+                   "    -u, --no-upper      Exclude uppercase letters\n"
+                   "    -l, --no-lower      Exclude lowercase letters\n"
+                   "    -d, --no-digits     Exclude digits\n"
+                   "    -s, --no-special    Exclude special characters\n\n",
+            false
+        }},
+
+        {"change-password", {
+            "Change master password",
+            "Help: change-password",
+            "  Usage: lptv change-password               Change your vault's master password\n\n"
         }}
     };
 };
@@ -100,10 +129,13 @@ void HelpPrinter::printGeneral() {
         << "Commands:\n";
     
     for(const auto& [command, info] : HELP) {
+        if (!info.showInGeneral) {
+            continue;
+        }
         std::cout
             << "  "
             << Console::BOLD
-            << std::left << std::setw(10)
+            << std::left << std::setw(16)
             << command
             << Console::RESET
             << info.description

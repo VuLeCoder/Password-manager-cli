@@ -2,8 +2,13 @@
 #include "storage/BinaryStorage.h"
 #include "utils/Constants.h"
 #include "cli/Console.h"
+#include "utils/Security.h"
+#include "core/SessionContext.h"
+#include "exception/PasswordManagerException.h"
 
 #include <algorithm>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 static SecureString toLower(SecureString s) {
     for(size_t i=0; i<s.size(); ++i) {
@@ -327,3 +332,21 @@ void PasswordManager::remove(const SecureString& service) {
 
     Console::printWarning("Account not found.");
 }
+
+void PasswordManager::changeMasterPassword(const SecureString& newPassword) {
+    auto salt = Security::generateSalt();
+    auto newKey = Security::deriveKey(newPassword, salt);
+    auto verifier = Security::sha256(newKey.data(), newKey.size());
+
+    std::ofstream file(Constants::MASTER_FILE, std::ios::binary);
+    if (!file.is_open()) {
+        throw PasswordManagerException("Failed to open master password file for writing.");
+    }
+    file.write(reinterpret_cast<const char*>(salt.data()), salt.size());
+    file.write(reinterpret_cast<const char*>(verifier.data()), verifier.size());
+    file.close();
+
+    SessionContext::get().setKey(newKey);
+    save();
+}
+

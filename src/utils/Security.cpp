@@ -51,6 +51,44 @@ std::vector<uint8_t> Security::generateSalt(size_t length) {
     return salt;
 }
 
+SecureString Security::generatePassword(
+    size_t length,
+    bool useUpper,
+    bool useLower,
+    bool useDigits,
+    bool useSpecial
+) {
+    std::string charset = "";
+    if (useUpper) charset += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if (useLower) charset += "abcdefghijklmnopqrstuvwxyz";
+    if (useDigits) charset += "0123456789";
+    if (useSpecial) charset += "!@#$%^&*()-_=+[]{}|;:,.<>?";
+
+    if (charset.empty()) {
+        throw EncryptException(
+            EncryptCode::EncryptError,
+            "At least one character set must be selected for password generation."
+        );
+    }
+
+    SecureString password;
+    for (size_t i = 0; i < length; ++i) {
+        uint8_t byte;
+        size_t limit = 256 - (256 % charset.size());
+        do {
+            if (RAND_bytes(&byte, 1) != 1) {
+                throw EncryptException(
+                    EncryptCode::RandomGenerationFailed,
+                    "Failed to generate random byte for password generation."
+                );
+            }
+        } while (byte >= limit);
+        password.push_back(charset[byte % charset.size()]);
+    }
+
+    return password;
+}
+
 std::array<uint8_t, 32> Security::deriveKey(
     const SecureString& password, 
     const std::vector<uint8_t>& salt
