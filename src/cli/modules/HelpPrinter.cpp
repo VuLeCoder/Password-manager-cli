@@ -1,6 +1,7 @@
 #include "cli/modules/HelpPrinter.h"
 #include "cli/Console.h"
 #include "exception/CommandException.h"
+#include "cli/Command.h"
 
 #include <iomanip>
 #include <unordered_map>
@@ -16,14 +17,14 @@ namespace {
     };
 
     const std::unordered_map<std::string_view, HelpInfo> HELP = {
-        {"add", {
+        {cmd::ADD, {
             "Add an account or category",
             "Help: add",
             "  Usage: lptv add <service>            Add a new account\n"
                    "         lptv add --category <name>    Add a new category\n\n"
         }},
 
-        {"list", {
+        {cmd::LIST, {
             "List accounts or categories",
             "Help: list",
             "  Usage: lptv list                 List all accounts\n"
@@ -31,51 +32,51 @@ namespace {
                    "         lptv list --category      List all categories\n\n"
         }},
 
-        {"get", {
+        {cmd::GET, {
             "Get account details",
             "Help: get",
             "  Usage: lptv get <service>          Show account details\n"
                    "         lptv get <service> --show   Show account details and password\n\n"
         }},
 
-        {"delete", {
+        {cmd::DELETE, {
             "Delete an account or category",
             "Help: delete",
             "  Usage: lptv delete <service>          Remove an account\n"
                    "         lptv delete --category <name>  Remove a category\n\n"
         }},
 
-        {"update", {
+        {cmd::UPDATE, {
             "Update an account",
             "Help: update",
             "  Usage: lptv update <service>       Update account details\n\n"
         }},
 
-        {"search", {
+        {cmd::SEARCH, {
             "Search accounts by keyword",
             "Help: search",
             "  Usage: lptv search <query>   Search accounts by service or username\n\n"
         }},
 
-        {"init", {
+        {cmd::INIT, {
             "Initialize the vault",
             "Help: init",
             "  Usage: lptv init     Initialize a new vault and set master password\n\n"
         }},
 
-        {"status", {
+        {cmd::STATUS, {
             "Check vault status",
             "Help: status",
             "  Usage: lptv status   Check if vault is initialized and unlocked\n\n"
         }},
 
-        {"shell", {
+        {cmd::SHELL, {
             "Enter interactive mode",
             "Help: shell",
             "  Usage: lptv shell    Enter interactive shell mode\n\n"
         }},
 
-        {"generate", {
+        {cmd::GENERATE, {
             "Generate a secure random password",
             "Help: generate",
             "  Usage: lptv generate [length] [options]  Generate a random password\n"
@@ -86,19 +87,7 @@ namespace {
                    "    -s, --no-special    Exclude special characters\n\n"
         }},
 
-        {"gen", {
-            "Generate a secure random password",
-            "Help: generate",
-            "  Usage: lptv generate [length] [options]  Generate a random password\n"
-                   "  Options:\n"
-                   "    -u, --no-upper      Exclude uppercase letters\n"
-                   "    -l, --no-lower      Exclude lowercase letters\n"
-                   "    -d, --no-digits     Exclude digits\n"
-                   "    -s, --no-special    Exclude special characters\n\n",
-            false
-        }},
-
-        {"change-password", {
+        {cmd::CHANGE_PASS, {
             "Change master password",
             "Help: change-password",
             "  Usage: lptv change-password      Change your vault's master password\n\n"
@@ -125,7 +114,7 @@ void HelpPrinter::printGeneral() {
 
     std::cout
         << "Usage:\n"
-        << "  lptv <command> [arguments]\n\n"
+        << "  lptv <command> [options] [arguments]\n\n"
         << "Commands:\n";
     
     for(const auto& [command, info] : HELP) {

@@ -63,20 +63,18 @@ void CommandParser::validate(const Command& cmd) {
     }
 
     using ValidateFunc = void(*)(const Command&);
-    static const std::unordered_map<std::string, ValidateFunc> validates = {
-        { "init",    validateInit    },
-        { "status",  validateStatus  },
-        { "shell",   validateShell   },
-
-        { "add",     validateAdd     },
-        { "list",    validateList    },
-        { "get",     validateGet     },
-        { "delete",  validateDelete  },
-        { "update",  validateUpdate  },
-        { "search",  validateSearch  },
-        { "generate", validateGenerate },
-        { "gen",      validateGenerate },
-        { "change-password", validateChangePassword }
+    static const std::unordered_map<std::string_view, ValidateFunc> validates = {
+        { cmd::INIT,        validateInit },
+        { cmd::STATUS,      validateStatus },
+        { cmd::SHELL,       validateShell },
+        { cmd::ADD,         validateAdd },
+        { cmd::LIST,        validateList },
+        { cmd::GET,         validateGet },
+        { cmd::DELETE,      validateDelete },
+        { cmd::UPDATE,      validateUpdate },
+        { cmd::SEARCH,      validateSearch },
+        { cmd::GENERATE,    validateGenerate },
+        { cmd::CHANGE_PASS, validateChangePassword }
     };
 
     auto it = validates.find(cmd.name);

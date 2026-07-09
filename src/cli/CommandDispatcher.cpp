@@ -1,8 +1,8 @@
+#include "cli/Command.h"
 #include "cli/CommandParser.h"
 #include "cli/CommandDispatcher.h"
 #include "cli/modules/HelpPrinter.h"
 #include "cli/Console.h"
-#include <chrono>
 
 #include "core/AuthGuard.h"
 #include "core/PasswordManager.h"
@@ -12,6 +12,7 @@
 #include "utils/Security.h"
 
 #include <unordered_map>
+#include <chrono>
 
 // === === helper === ===
 // === === === === === ===
@@ -120,7 +121,7 @@ void CommandDispatcher::handleShell(const Command& cmd) {
         if(input.empty()) continue;
 
         Command innerCmd = CommandParser::parse(input);
-        if(innerCmd.name == "shell") {
+        if(innerCmd.name == cmd::SHELL) {
             Console::printWarning("Already in interactive mode.");
             continue;
         }
@@ -141,13 +142,16 @@ void CommandDispatcher::handleList(const Command& cmd) {
     requireUnlock();
     PasswordManager lptv;
 
-    if(!cmd.args.empty() && cmd.args.front() == "--category") {
+    if(cmd.args.empty()) {
+        SecureString category = cmd.args.empty() ? "" : cmd.args[0];
+        lptv.list(category);
+        return;
+    }
+
+    if(cmd.args.front() == "--category" || cmd.args.front() == "-c") {
         lptv.listCategories();
         return;
     }
-    
-    SecureString category = cmd.args.empty() ? "" : cmd.args[0];
-    lptv.list(category);
 }
 
 void CommandDispatcher::handleSearch(const Command& cmd) {
@@ -185,7 +189,7 @@ void CommandDispatcher::handleDelete(const Command& cmd) {
     requireUnlock();
     PasswordManager lptv;
 
-    if(cmd.args.front() == "--category") {
+    if(cmd.args.front() == "--category" || cmd.args.front() == "-c") {
         lptv.removeCategory(cmd.args[1]);
         return;
     }
@@ -275,7 +279,7 @@ void CommandDispatcher::execute(const Command& cmd) {
         return;
     }
 
-    if(cmd.name == "init") {
+    if(cmd.name == cmd::INIT) {
         handleInit(cmd);
         return;
     }
@@ -285,18 +289,17 @@ void CommandDispatcher::execute(const Command& cmd) {
     }
 
     using HandlerFunc = void(*)(const Command&);
-    static const std::unordered_map<std::string, HandlerFunc> handlers = {
-        { "status", handleStatus    },
-        { "shell",  handleShell     },
-        { "list",   handleList      },
-        { "search", handleSearch    },
-        { "add",    handleAdd       },
-        { "update", handleUpdate    },
-        { "get",    handleGet       },
-        { "delete", handleDelete    },
-        { "generate", handleGenerate },
-        { "gen",      handleGenerate },
-        { "change-password", handleChangePassword }
+    static const std::unordered_map<std::string_view, HandlerFunc> handlers = {
+        { cmd::STATUS,      handleStatus        },
+        { cmd::SHELL,       handleShell         },
+        { cmd::LIST,        handleList          },
+        { cmd::SEARCH,      handleSearch        },
+        { cmd::ADD,         handleAdd           },
+        { cmd::UPDATE,      handleUpdate        },
+        { cmd::GET,         handleGet           },
+        { cmd::DELETE,      handleDelete        },
+        { cmd::GENERATE,    handleGenerate      },
+        { cmd::CHANGE_PASS, handleChangePassword }
     };
 
     auto it = handlers.find(cmd.name);
