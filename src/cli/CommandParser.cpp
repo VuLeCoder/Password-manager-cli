@@ -167,7 +167,6 @@ void CommandParser::validateGet(const Command& cmd) {
         return;
     }
 
-
     throw CommandException(
         CommandCode::Error,
         "Invalid usage.\nRun 'lptv " + cmd.name + " -h' for help."
