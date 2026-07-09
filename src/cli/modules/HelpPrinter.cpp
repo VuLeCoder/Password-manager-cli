@@ -34,7 +34,8 @@ namespace {
         {"get", {
             "Get account details",
             "Help: get",
-            "  Usage: lptv get <service>          Show account details and copy password\n\n"
+            "  Usage: lptv get <service>          Show account details\n"
+                   "         lptv get <service> --show   Show account details and password\n\n"
         }},
 
         {"delete", {
