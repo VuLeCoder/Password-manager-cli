@@ -25,7 +25,7 @@ void CommandDispatcher::requireUnlock() {
         return;
     }
 
-    std::cout << "Vault is locked.\n;";
+    std::cout << "Vault is locked.\n";
     std::cout << Console::BOLD << "  Enter password" << Console::RESET << ": ";
     SecureString password;
     Console::readSecureHiddenInput(password);
@@ -34,6 +34,8 @@ void CommandDispatcher::requireUnlock() {
     if(!res.first) {
         throw CommandException(CommandCode::Error, "Invalid password.");
     }
+
+    AuthGuard::unlock(res.second);
 }
 
 bool CommandDispatcher::isHelp(const Command& cmd) {
@@ -184,6 +186,11 @@ void CommandDispatcher::handleDelete(const Command& cmd) {
 
 // === === public === ===
 void CommandDispatcher::execute(const Command& cmd) {
+    if (cmd.name.empty()) {
+        handleHelp("");
+        return;
+    }
+
     if(isHelp(cmd)) {
         handleHelp(cmd.name);
         return;
@@ -211,5 +218,12 @@ void CommandDispatcher::execute(const Command& cmd) {
     };
 
     auto it = handlers.find(cmd.name);
-    it->second(cmd);
+    if (it != handlers.end()) {
+        it->second(cmd);
+    } else {
+        throw CommandException(
+            CommandCode::Unknown,
+            "Unknown command: " + cmd.name
+        );
+    }
 }
