@@ -111,7 +111,7 @@ bool Console::readLine(SecureString& out, bool echo) {
         int ch = 0;
         while (true) {
             if (isShell && std::chrono::steady_clock::now() >= shellEndTime) {
-                std::cout << "\n" << YELLOW << "Shell session timeout (5 minutes elapsed). Exiting..." << RESET << std::endl;
+                Console::printWarning("Shell session timeout (1 minutes elapsed). Exiting...");
                 std::exit(0);
             }
             if (_kbhit()) {

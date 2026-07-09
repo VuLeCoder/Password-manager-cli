@@ -111,7 +111,7 @@ void CommandDispatcher::handleShell(const Command& cmd) {
     SecureString input;
     while(true) {
         if (std::chrono::steady_clock::now() >= Console::shellEndTime) {
-            Console::printWarning("Shell session timeout (5 minutes elapsed). Exiting...");
+            Console::printWarning("Shell session timeout (1 minutes elapsed). Exiting...");
             break;
         }
         std::cout << Console::CYAN << "lptv> " << Console::RESET;
