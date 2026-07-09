@@ -52,7 +52,7 @@ namespace {
         }},
 
         {"search", {
-            "Search accounts reference word",
+            "Search accounts by keyword",
             "Help: search",
             "  Usage: lptv search <query>         Search accounts by service or username\n\n"
         }},
