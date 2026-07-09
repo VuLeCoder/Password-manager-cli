@@ -2,6 +2,7 @@
 #include "cli/CommandDispatcher.h"
 #include "cli/modules/HelpPrinter.h"
 #include "cli/Console.h"
+#include <chrono>
 
 #include "core/AuthGuard.h"
 #include "core/PasswordManager.h"
@@ -101,11 +102,18 @@ void CommandDispatcher::handleShell(const Command& cmd) {
     
     AuthGuard::unlock(res.second);
 
+    Console::isShell = true;
+    Console::shellEndTime = std::chrono::steady_clock::now() + std::chrono::minutes(1);
+
     Console::printHeader("Entering Interactive Mode");
     std::cout << Console::GREY << "(type 'exit' or 'quit' to leave)" << Console::RESET << "\n\n";
 
     SecureString input;
     while(true) {
+        if (std::chrono::steady_clock::now() >= Console::shellEndTime) {
+            Console::printWarning("Shell session timeout (5 minutes elapsed). Exiting...");
+            break;
+        }
         std::cout << Console::CYAN << "lptv> " << Console::RESET;
         if(!Console::readSecureInput(input)) break;
         if(input == "exit" || input == "quit") break;
@@ -119,6 +127,7 @@ void CommandDispatcher::handleShell(const Command& cmd) {
         execute(innerCmd);
     }
 
+    Console::isShell = false;
     Console::printInfo("Exiting interactive mode.");
 }
 

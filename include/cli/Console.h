@@ -3,6 +3,7 @@
 #include <string_view>
 #include <vector>
 #include <iostream>
+#include <chrono>
 
 class Console{
 public:
@@ -28,6 +29,9 @@ public:
     static const std::string MAGENTA;
     static const std::string CYAN;
     static const std::string GREY;
+
+    static std::chrono::steady_clock::time_point shellEndTime;
+    static bool isShell;
 
     // Semantic Printing
     template<typename... Args>

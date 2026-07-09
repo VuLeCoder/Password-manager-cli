@@ -3,6 +3,7 @@
 
 #include <conio.h>
 #include <iomanip>
+#include <thread>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -20,6 +21,9 @@ const std::string Console::BLUE    = "\033[34m";
 const std::string Console::MAGENTA = "\033[35m";
 const std::string Console::CYAN    = "\033[36m";
 const std::string Console::GREY    = "\033[90m";
+
+std::chrono::steady_clock::time_point Console::shellEndTime;
+bool Console::isShell = false;
 
 void Console::enableAnsiSupport() {
 #ifdef _WIN32
@@ -104,7 +108,18 @@ bool Console::readLine(SecureString& out, bool echo) {
     out.clear();
 
     while(true) {
-        int ch = _getch();
+        int ch = 0;
+        while (true) {
+            if (isShell && std::chrono::steady_clock::now() >= shellEndTime) {
+                std::cout << "\n" << YELLOW << "Shell session timeout (5 minutes elapsed). Exiting..." << RESET << std::endl;
+                std::exit(0);
+            }
+            if (_kbhit()) {
+                ch = _getch();
+                break;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
 
         if(ch == 26) {
             return false;
