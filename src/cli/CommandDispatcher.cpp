@@ -210,6 +210,11 @@ void CommandDispatcher::handleAdd(const Command& cmd) {
 void CommandDispatcher::handleUpdate(const Command& cmd) {
     requireUnlock();
     PasswordManager lptv;
+
+    if(CommandCheck::isCategory(cmd.args.front().view())) {
+        lptv.updateCategory(cmd.args[1]);
+        return;
+    }
     lptv.update(cmd.args[0]);
 }
 

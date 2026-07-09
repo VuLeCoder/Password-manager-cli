@@ -15,6 +15,7 @@ public:
     void search(const SecureString& query) const;
     void add(const SecureString& service);
     void addCategory(const SecureString& category);
+    void updateCategory(const SecureString& category);
     void removeCategory(const SecureString& category);
     void update(const SecureString& service);
     void get(const SecureString& service, bool isHiddenPassword) const;

@@ -1,5 +1,6 @@
 #include "core/PasswordManager.h"
 #include "storage/BinaryStorage.h"
+#include "string/SecureString.h"
 #include "utils/Constants.h"
 #include "cli/Console.h"
 #include "utils/Security.h"
@@ -145,25 +146,59 @@ void PasswordManager::addCategory(const SecureString& category) {
     Console::printSuccess(msg.view());
 }
 
+void PasswordManager::updateCategory(const SecureString& oldCategory) {
+    auto it = std::find_if(categories.begin(), categories.end(), [&](const SecureString& cat) {
+        return toLower(cat) == toLower(oldCategory);
+    });
+
+    if(it == categories.end()) {
+        SecureString msg("Category '");
+        msg += oldCategory; msg += "' not found.";
+        Console::printWarning(msg.view());
+        return;
+    }
+
+    std::cout << Console::BOLD << "  New category " << Console::RESET << ": ";
+    SecureString newCategory;
+    Console::readSecureInput(newCategory);
+
+    for(auto& account : accounts) {
+        if(account.getCategory().find(oldCategory)) {
+            account.setCategory(newCategory);
+        }
+    }
+
+    save();
+    Console::printSuccess("Category updated.");
+}
+
 void PasswordManager::removeCategory(const SecureString& category) {
     auto it = std::find_if(categories.begin(), categories.end(), [&](const SecureString& cat) {
         return toLower(cat) == toLower(category);
     });
 
-    if (it != categories.end()) {
-        categories.erase(it);
-        save();
-
+    if(it == categories.end()) {
         SecureString msg("Category '");
-        msg += category; msg += "' removed.";
-        Console::printSuccess(msg.view());
-
+        msg += category; msg += "' not found.";
+        Console::printWarning(msg.view());
         return;
     }
 
+    for(const auto& account : accounts) {
+        if(account.getCategory().find(category)) {
+            SecureString msg("All accounts in the '");
+            msg += category; msg += "' must be deleted.";
+            Console::printWarning(msg.view());
+            return;
+        }
+    }
+
+    categories.erase(it);
+    save();
+
     SecureString msg("Category '");
-    msg += category; msg += "' not found.";
-    Console::printWarning(msg.view());
+    msg += category; msg += "' removed.";
+    Console::printSuccess(msg.view());
 }
 
 void PasswordManager::search(const SecureString& query) const {

@@ -205,7 +205,13 @@ void CommandParser::validateDelete(const Command& cmd) {
 }
 
 void CommandParser::validateUpdate(const Command& cmd) {
-    if(cmd.args.size() == 1) {
+    const auto& args = cmd.args;
+
+    if(args.size() == 1 && !CommandCheck::isCategory(args.front().view())) {
+        return;
+    }
+
+    if(args.size() == 2 && CommandCheck::isCategory(args.front().view())) {
         return;
     }
 
@@ -251,4 +257,3 @@ void CommandParser::validateChangePassword(const Command& cmd) {
         "Command '" + cmd.name + "' does not take arguments.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
-

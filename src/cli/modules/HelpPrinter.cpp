@@ -55,7 +55,10 @@ namespace {
         {cmd::UPDATE, {
             "Update an account",
             "Help: update",
-            "  Usage: lptv update <service>       Update account details\n\n"
+            "  Usage: lptv update <service>             Update account details\n"
+                   "         lptv update [options] <service>   Update account details\n"
+                   "  Options:\n"
+                   "    -c, --category      Specify category mode\n\n"
         }},
 
         {cmd::SEARCH, {
