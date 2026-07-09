@@ -311,7 +311,7 @@ void PasswordManager::get(const SecureString& service, bool isHiddenPassword) co
 
     if(choice == 'y' || choice == 'Y') {
         Console::copyToClipboard(account->getPassword());
-        Console::printSuccess("Password copied to clipboard!");
+        Console::printSuccess("Password copied to clipboard! (will be cleared automatically after 30 seconds)");
     }
 }
 
