@@ -8,6 +8,7 @@
 #include "exception/PasswordManagerException.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <fstream>
 
 
@@ -40,6 +41,26 @@ const Account* PasswordManager::findAccount(const SecureString& service) const {
 }
 
 void PasswordManager::save() {
+    if(accChanged) {
+        std::sort(accounts.begin(), accounts.end(),
+        [](const Account& a, const Account& b) {
+    
+            if(a.getCategory() != b.getCategory())
+                return a.getCategory().view() < b.getCategory().view();
+    
+            return a.getService().view() < b.getService().view();
+        });
+    }
+    accChanged = false;
+
+    if(categoryChanged) {
+        std::sort(categories.begin(), categories.end(),
+        [](const SecureString& a, const SecureString& b) {
+            return a.view() < b.view();
+        });
+    }
+    categoryChanged = false;
+
     BinaryStorage::save({accounts, categories}, Constants::VAULT_DB);
 }
 
@@ -139,6 +160,7 @@ void PasswordManager::addCategory(const SecureString& category) {
     }
 
     categories.push_back(category);
+    categoryChanged = true;
     save();
 
     SecureString msg("Category '");
@@ -168,6 +190,7 @@ void PasswordManager::updateCategory(const SecureString& oldCategory) {
         }
     }
 
+    categoryChanged = true;
     save();
     Console::printSuccess("Category updated.");
 }
@@ -242,19 +265,34 @@ void PasswordManager::list(const SecureString& categoryFilter) const
         return;
     }
 
-    std::vector<std::string> headers = {"Service", "Username", "Category"};
+    std::vector<std::string> headers = {"Category", "Service", "Username"};
     std::vector<std::vector<SecureString>> rows;
 
-    for(const auto& account : accounts) {
-        if (!categoryFilter.empty() && toLower(account.getCategory()) != toLower(categoryFilter)) {
+    size_t index = 0;
+    for(const auto& c : categories) {
+        if(!categoryFilter.empty() && toLower(c) != toLower(categoryFilter)) {
             continue;
         }
 
-        rows.push_back({
-            account.getService(),
-            account.getUsername(),
-            account.getCategory()
-        });
+        for(size_t i=index; i<categories.size(); ++i) {
+            if(accounts[i].getCategory() != c) {
+                break;
+            }
+
+            rows.push_back({
+                "",
+                accounts[i].getService(),
+                accounts[i].getUsername()
+            });
+        }
+
+        if(index >= rows.size()) {
+            continue;
+        }
+
+        rows[index][0] = c;
+        rows.push_back({});
+        index = rows.size();
     }
 
     if (rows.empty()) {
@@ -294,6 +332,7 @@ void PasswordManager::add(const SecureString& service) {
     
     Account acc = inputAccount(service);
     accounts.emplace_back(acc);
+    accChanged = true;
     save();
 
     Console::printSuccess("Account saved.");
@@ -312,6 +351,7 @@ void PasswordManager::update(const SecureString& service) {
     existsAcc->setCategory(acc.getCategory());
     existsAcc->setNote(acc.getNote());
 
+    accChanged = true;
     save();
 
     Console::printSuccess("Account updated.");

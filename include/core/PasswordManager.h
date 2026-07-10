@@ -7,6 +7,9 @@ private:
     std::vector<Account> accounts;
     std::vector<SecureString> categories;
 
+    bool accChanged = false;
+    bool categoryChanged = false;
+
 public:
     PasswordManager();
 
