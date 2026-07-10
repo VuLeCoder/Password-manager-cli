@@ -5,46 +5,52 @@
 #include <thread>
 
 #ifdef _WIN32
-#include <conio.h>
-#include <windows.h>
-#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
-#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-#endif
+    #include <conio.h>
+    #include <windows.h>
+    #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+    #endif
 
-void Console::enableAnsiSupport() {
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE) return;
+    #define POPEN  _popen
+    #define PCLOSE _pclose
 
-    DWORD dwMode = 0;
-    if (!GetConsoleMode(hOut, &dwMode)) return;
+    void Console::enableAnsiSupport() {
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (hOut == INVALID_HANDLE_VALUE) return;
 
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(hOut, dwMode);
-}
+        DWORD dwMode = 0;
+        if (!GetConsoleMode(hOut, &dwMode)) return;
 
-int Console::getch() {
-    return _getch();
-}
+        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        SetConsoleMode(hOut, dwMode);
+    }
 
-bool Console::kbhit() {
-    return _kbhit();
-}
+    int Console::getch() {
+        return _getch();
+    }
+
+    bool Console::kbhit() {
+        return _kbhit();
+    }
 
 #else
-#include <termios.h>
-#include <unistd.h>
+    #include <termios.h>
+    #include <unistd.h>
 
-void Console::enableAnsiSupport() {}
+    #define POPEN  popen
+    #define PCLOSE pclose
 
-int Console::getch() {
-    unsigned char c;
-    if(read(STDIN_FILENO, &c, 1) == 1)
-        return c;
+    void Console::enableAnsiSupport() {}
 
-    return EOF;
-}
+    int Console::getch() {
+        unsigned char c;
+        if(read(STDIN_FILENO, &c, 1) == 1)
+            return c;
 
-bool Console::kbhit() {}
+        return EOF;
+    }
+
+    bool Console::kbhit() {}
 
 #endif
 
@@ -195,19 +201,19 @@ bool Console::readSecureHiddenInput(SecureString& out) {
 }
 
 bool Console::copyToClipboard(const SecureString& text, int delaySeconds) {
-    FILE* pipe = _popen("clip", "w");
+    FILE* pipe = POPEN("clip", "w");
     if (!pipe) return false;
 
     fprintf(pipe, "%s", text.c_str());
-    _pclose(pipe);
+    PCLOSE(pipe);
 
     if (delaySeconds > 0) {
         std::string cmd = "start /b powershell -WindowStyle Hidden -Command \"Start-Sleep -Seconds " 
                           + std::to_string(delaySeconds) 
                           + "; cmd.exe /c 'type nul | clip'\"";
-        FILE* clearPipe = _popen(cmd.c_str(), "w");
-        if (clearPipe) {
-            _pclose(clearPipe);
+        FILE* clearPipe = POPEN(cmd.c_str(), "w");
+        if(clearPipe) {
+            PCLOSE(clearPipe);
         }
     }
     return true;
