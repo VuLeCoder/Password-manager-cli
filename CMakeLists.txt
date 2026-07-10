@@ -87,10 +87,22 @@ target_link_libraries(
     SecureString
     ${ARGON2_LIBRARIES}
     ${OPENSSL_LIBRARIES}
-    crypt32
-    ws2_32
-    bcrypt
 )
+
+if(WIN32)
+    target_link_libraries(password-manager PRIVATE
+        ws2_32
+        crypt32
+        bcrypt
+    )
+elseif(UNIX)
+    target_link_libraries(password-manager PRIVATE
+        ssl
+        crypto
+        pthread
+    )
+endif()
+
 
 set_target_properties(password-manager PROPERTIES
     OUTPUT_NAME "lptv"
