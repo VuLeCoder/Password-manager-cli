@@ -1,15 +1,51 @@
 #include "cli/Console.h"
 #include "string/SecureString.h"
 
-#include <conio.h>
 #include <iomanip>
 #include <thread>
 
 #ifdef _WIN32
+#include <conio.h>
 #include <windows.h>
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
+
+void Console::enableAnsiSupport() {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE) return;
+
+    DWORD dwMode = 0;
+    if (!GetConsoleMode(hOut, &dwMode)) return;
+
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, dwMode);
+}
+
+int Console::getch() {
+    return _getch();
+}
+
+bool Console::kbhit() {
+    return _kbhit();
+}
+
+#else
+#include <termios.h>
+#include <unistd.h>
+
+void Console::enableAnsiSupport() {}
+
+int Console::getch() {
+    unsigned char c;
+    if(read(STDIN_FILENO, &c, 1) == 1)
+        return c;
+
+    return EOF;
+}
+
+bool Console::kbhit() {}
+
 #endif
 
 const std::string Console::RESET   = "\033[0m";
@@ -24,19 +60,6 @@ const std::string Console::GREY    = "\033[90m";
 
 std::chrono::steady_clock::time_point Console::shellEndTime;
 bool Console::isShell = false;
-
-void Console::enableAnsiSupport() {
-#ifdef _WIN32
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE) return;
-
-    DWORD dwMode = 0;
-    if (!GetConsoleMode(hOut, &dwMode)) return;
-
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(hOut, dwMode);
-#endif
-}
 
 void Console::printHeader(std::string_view message) {
     enableAnsiSupport();
@@ -110,15 +133,15 @@ bool Console::readLine(SecureString& out, bool echo) {
     while(true) {
         int ch = 0;
         while (true) {
-            if (isShell && std::chrono::steady_clock::now() >= shellEndTime) {
+            if(isShell && std::chrono::steady_clock::now() >= shellEndTime) {
                 Console::printWarning("Shell session timeout (1 minutes elapsed). Exiting...");
 
                 std::this_thread::sleep_for(std::chrono::seconds(3));
                 Console::clear();
                 std::exit(0);
             }
-            if (_kbhit()) {
-                ch = _getch();
+            if(kbhit()) {
+                ch = getch();
                 break;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -129,7 +152,7 @@ bool Console::readLine(SecureString& out, bool echo) {
         }
 
         if(ch == 0 || ch == 0xE0) {
-            _getch();
+            getch();
             continue;
         }
 

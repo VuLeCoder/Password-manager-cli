@@ -50,6 +50,9 @@ public:
 
 
 private:
+    static int getch();
+    static bool kbhit();
+
     static void enableAnsiSupport();
     static bool readLine(SecureString& out, bool echo);
 };
