@@ -274,7 +274,7 @@ void PasswordManager::list(const SecureString& categoryFilter) const
             continue;
         }
 
-        for(size_t i=index; i<categories.size(); ++i) {
+        for(size_t i=index; i<accounts.size(); ++i) {
             if(accounts[i].getCategory() != c) {
                 break;
             }
