@@ -19,6 +19,8 @@ public:
 
     static bool copyToClipboard(const SecureString& text, int delaySeconds = 30);
 
+    static void clear();
+
     // ANSI Colors
     static const std::string RESET;
     static const std::string BOLD;

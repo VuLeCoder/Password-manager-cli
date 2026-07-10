@@ -112,6 +112,9 @@ bool Console::readLine(SecureString& out, bool echo) {
         while (true) {
             if (isShell && std::chrono::steady_clock::now() >= shellEndTime) {
                 Console::printWarning("Shell session timeout (1 minutes elapsed). Exiting...");
+
+                std::this_thread::sleep_for(std::chrono::seconds(3));
+                Console::clear();
                 std::exit(0);
             }
             if (_kbhit()) {
@@ -185,4 +188,10 @@ bool Console::copyToClipboard(const SecureString& text, int delaySeconds) {
         }
     }
     return true;
+}
+
+void Console::clear() {
+    enableAnsiSupport();
+    std::cout << "\x1b[2J\x1b[H";
+    std::cout.flush();
 }

@@ -13,6 +13,7 @@
 
 #include <unordered_map>
 #include <chrono>
+#include <thread>
 
 // === === helper === ===
 // === === === === === ===
@@ -130,7 +131,7 @@ void CommandDispatcher::handleInit(const Command& cmd) {
 void CommandDispatcher::handleShell(const Command& cmd) {
     std::cout << Console::BOLD << "  Enter password" << Console::RESET << ": ";
     SecureString password;
-    Console::readSecureHiddenInput(password);        
+    Console::readSecureHiddenInput(password);
 
     std::pair<bool, std::array<uint8_t, 32>> res = Vault::verifyLPTV(password);
     if(!res.first) {
@@ -149,8 +150,12 @@ void CommandDispatcher::handleShell(const Command& cmd) {
     while(true) {
         if (std::chrono::steady_clock::now() >= Console::shellEndTime) {
             Console::printWarning("Shell session timeout (1 minutes elapsed). Exiting...");
+
+            std::this_thread::sleep_for(std::chrono::seconds(3));
+            Console::clear();
             break;
         }
+
         std::cout << Console::CYAN << "lptv> " << Console::RESET;
         if(!Console::readSecureInput(input)) break;
         if(input == "exit" || input == "quit") break;
@@ -304,7 +309,14 @@ void CommandDispatcher::handleChangePassword(const Command& cmd) {
     Console::printSuccess("Master password changed successfully.");
 }
 
-
+void CommandDispatcher::handleClear(const Command& cmd) {
+    Console::clear();
+    if(Console::isShell) {
+        std::cout << "\n";
+        Console::printHeader("Entering Interactive Mode");
+        std::cout << Console::GREY << "(type 'exit' or 'quit' to leave)" << Console::RESET << "\n\n";
+    }
+}
 // ===
 // === === === === === ===
 
@@ -340,7 +352,8 @@ void CommandDispatcher::execute(const Command& cmd) {
         { cmd::GET,         handleGet           },
         { cmd::DELETE,      handleDelete        },
         { cmd::GENERATE,    handleGenerate      },
-        { cmd::CHANGE_PASS, handleChangePassword }
+        { cmd::CHANGE_PASS, handleChangePassword },
+        { cmd::CLEAR, handleClear }
     };
 
     auto it = handlers.find(cmd.name);

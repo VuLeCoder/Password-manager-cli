@@ -17,6 +17,7 @@ namespace cmd {
     constexpr std::string_view SEARCH = "search";
     constexpr std::string_view GENERATE = "generate";
     constexpr std::string_view CHANGE_PASS = "change-password";
+    constexpr std::string_view CLEAR = "clear";
 }
 
 struct Command{

@@ -84,7 +84,9 @@ void CommandParser::validate(const Command& cmd) {
         { cmd::UPDATE,      validateUpdate },
         { cmd::SEARCH,      validateSearch },
         { cmd::GENERATE,    validateGenerate },
-        { cmd::CHANGE_PASS, validateChangePassword }
+
+        { cmd::CHANGE_PASS, validateChangePassword },
+        { cmd::CLEAR,       validateClear }
     };
 
     auto it = validates.find(cmd.name);
@@ -257,3 +259,5 @@ void CommandParser::validateChangePassword(const Command& cmd) {
         "Command '" + cmd.name + "' does not take arguments.\nRun 'lptv " + cmd.name + " -h' for help."
     );
 }
+
+void CommandParser::validateClear(const Command& cmd) {}

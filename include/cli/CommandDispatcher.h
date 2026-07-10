@@ -19,6 +19,7 @@ private:
     static void handleDelete(const Command& cmd);
     static void handleGenerate(const Command& cmd);
     static void handleChangePassword(const Command& cmd);
+    static void handleClear(const Command& cmd);
 
 public:
     static void execute(const Command& cmd);

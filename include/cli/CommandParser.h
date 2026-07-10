@@ -37,4 +37,5 @@ private:
     static void validateSearch(const Command&);
     static void validateGenerate(const Command&);
     static void validateChangePassword(const Command&);
+    static void validateClear(const Command&);
 };
