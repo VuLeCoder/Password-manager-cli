@@ -115,7 +115,7 @@ jobs:
         run: |
           mkdir package
 
-          cp build/lptv.exe package/
+          cp build/bin/lptv.exe package/
           cp README.md package/
 
           if [ -f LICENSE ]; then
