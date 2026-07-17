@@ -78,25 +78,25 @@ set(HEADERS
 # Executable
 # =========================================================
 
-add_executable(password-manager
+add_executable(lptv
     ${SOURCES}
     ${HEADERS}
 )
 
-target_compile_features(password-manager PRIVATE cxx_std_17)
+target_compile_features(lptv PRIVATE cxx_std_17)
 
 # =========================================================
 # Include directories
 # =========================================================
 
-target_include_directories(password-manager
+target_include_directories(lptv
     PRIVATE
         include
         ${ARGON2_INCLUDE_DIRS}
         ${OPENSSL_INCLUDE_DIRS}
 )
 
-target_link_directories(password-manager
+target_link_directories(lptv
     PRIVATE
         ${ARGON2_LIBRARY_DIRS}
         ${OPENSSL_LIBRARY_DIRS}
@@ -106,7 +106,7 @@ target_link_directories(password-manager
 # Libraries
 # =========================================================
 
-target_link_libraries(password-manager
+target_link_libraries(lptv
     PRIVATE
         SecureString
         Threads::Threads
@@ -116,7 +116,7 @@ target_link_libraries(password-manager
 
 if(WIN32)
 
-    target_link_libraries(password-manager PRIVATE
+    target_link_libraries(lptv PRIVATE
         ws2_32
         crypt32
         bcrypt
@@ -124,7 +124,7 @@ if(WIN32)
 
 elseif(UNIX)
 
-    target_link_libraries(password-manager PRIVATE
+    target_link_libraries(lptv PRIVATE
         pthread
     )
 
@@ -136,13 +136,13 @@ endif()
 
 if(MSVC)
 
-    target_compile_options(password-manager PRIVATE
+    target_compile_options(lptv PRIVATE
         /W4
     )
 
 else()
 
-    target_compile_options(password-manager PRIVATE
+    target_compile_options(lptv PRIVATE
         -Wall
         -Wextra
         -Wpedantic
@@ -154,7 +154,7 @@ endif()
 # Output
 # =========================================================
 
-set_target_properties(password-manager PROPERTIES
+set_target_properties(lptv PROPERTIES
     OUTPUT_NAME "lptv"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
@@ -165,7 +165,7 @@ set_target_properties(password-manager PROPERTIES
 
 if(MINGW)
 
-    target_link_options(password-manager PRIVATE
+    target_link_options(lptv PRIVATE
         -static
         -static-libgcc
         -static-libstdc++
@@ -178,7 +178,7 @@ endif()
 # =========================================================
 
 install(
-    TARGETS password-manager
+    TARGETS lptv
     RUNTIME DESTINATION bin
 )
 
