@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      ####################################################
+      # Ubuntu
+      ####################################################
+
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update
+
+          sudo apt install -y \
+            build-essential \
+            cmake \
+            pkg-config \
+            libssl-dev \
+            libargon2-dev
+
+      - name: Configure CMake (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cmake \
+            -B build \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cmake --build build --config Release
+
+      ####################################################
+      # Windows (MSYS2)
+      ####################################################
+
+      - name: Setup MSYS2
+        if: matrix.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+
+          install: >
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-make
+            mingw-w64-ucrt-x86_64-pkg-config
+            mingw-w64-ucrt-x86_64-openssl
+            mingw-w64-ucrt-x86_64-argon2
+
+      - name: Configure CMake (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          cmake \
+            -B build \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          cmake --build build --config Release
