@@ -102,7 +102,10 @@ jobs:
 
           cp build/bin/lptv package/
           cp README.md package/
-          cp LICENSE package/
+
+          if [ -f LICENSE ]; then
+            cp LICENSE package/
+          fi
 
           tar -czf LPTV-${{ github.ref_name }}-linux-x64.tar.gz package
 
@@ -112,9 +115,12 @@ jobs:
         run: |
           mkdir package
 
-          cp build/bin/lptv.exe package/
+          cp build/lptv.exe package/
           cp README.md package/
-          cp LICENSE package/
+
+          if [ -f LICENSE ]; then
+            cp LICENSE package/
+          fi
 
           cd package
           zip -r ../LPTV-${{ github.ref_name }}-windows-x64.zip *
@@ -126,6 +132,7 @@ jobs:
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         with:
+          body_path: RELEASE.md
           files: |
             *.zip
             *.tar.gz
