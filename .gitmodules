@@ -1,0 +1,3 @@
+[submodule "external/Secure-string"]
+	path = external/Secure-string
+	url = https://github.com/VuLeCoder/Secure-string
