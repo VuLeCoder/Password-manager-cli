@@ -184,8 +184,7 @@ void CommandDispatcher::handleList(const Command& cmd) {
     PasswordManager lptv;
 
     if(cmd.args.empty()) {
-        SecureString category = cmd.args.empty() ? "" : cmd.args[0];
-        lptv.list(category);
+        lptv.list("");
         return;
     }
 
@@ -193,6 +192,8 @@ void CommandDispatcher::handleList(const Command& cmd) {
         lptv.listCategories();
         return;
     }
+
+    lptv.list(cmd.args[0]);
 }
 
 void CommandDispatcher::handleSearch(const Command& cmd) {

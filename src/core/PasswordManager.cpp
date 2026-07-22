@@ -268,31 +268,30 @@ void PasswordManager::list(const SecureString& categoryFilter) const
     std::vector<std::string> headers = {"Category", "Service", "Username"};
     std::vector<std::vector<SecureString>> rows;
 
-    size_t index = 0;
     for(const auto& c : categories) {
         if(!categoryFilter.empty() && toLower(c) != toLower(categoryFilter)) {
             continue;
         }
 
-        for(size_t i=index; i<accounts.size(); ++i) {
-            if(accounts[i].getCategory() != c) {
-                break;
+        bool firstInGroup = true;
+        for(const auto& acc : accounts) {
+            if(acc.getCategory() == c) {
+                rows.push_back({
+                    firstInGroup ? c : "",
+                    acc.getService(),
+                    acc.getUsername()
+                });
+                firstInGroup = false;
             }
-
-            rows.push_back({
-                "",
-                accounts[i].getService(),
-                accounts[i].getUsername()
-            });
         }
 
-        if(index >= rows.size()) {
-            continue;
+        if (!firstInGroup) {
+            rows.push_back({});
         }
+    }
 
-        rows[index][0] = c;
-        rows.push_back({});
-        index = rows.size();
+    if (!rows.empty() && rows.back().empty()) {
+        rows.pop_back();
     }
 
     if (rows.empty()) {
