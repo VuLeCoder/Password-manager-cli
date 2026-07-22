@@ -36,6 +36,7 @@
 #else
     #include <termios.h>
     #include <unistd.h>
+    #include <fcntl.h>
 
     #define POPEN  popen
     #define PCLOSE pclose
@@ -50,7 +51,29 @@
         return EOF;
     }
 
-    bool Console::kbhit() {}
+    bool Console::kbhit() {
+        termios oldt{};
+        tcgetattr(STDIN_FILENO, &oldt);
+
+        termios newt = oldt;
+        newt.c_lflag &= ~(ICANON | ECHO); // non-canonical, không echo
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+        int oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+        int ch = getchar();
+
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+        fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+        if (ch != EOF) {
+            ungetc(ch, stdin);   // trả ký tự lại để lần sau vẫn đọc được
+            return true;
+        }
+
+        return false;
+    }
 
 #endif
 
