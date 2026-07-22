@@ -372,7 +372,7 @@ void PasswordManager::get(const SecureString& service, bool isHiddenPassword) co
     std::cout << "  " << Console::BOLD << "Username" << Console::RESET << " : " << account->getUsername().view() << "\n";
 
     std::cout << "  " << Console::BOLD << "Password" << Console::RESET << " : ";
-    if(isHiddenPassword) Console::printHiddenPassword(account->getPassword());
+    if(isHiddenPassword) Console::printHiddenPassword();
     else std::cout << account->getPassword().view();
     std::cout << "\n";
     
