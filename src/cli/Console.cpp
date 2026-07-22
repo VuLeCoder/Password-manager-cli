@@ -3,6 +3,7 @@
 
 #include <iomanip>
 #include <thread>
+#include <cstdlib>
 
 #ifdef _WIN32
     #include <conio.h>
@@ -85,9 +86,9 @@
         int retval = select(STDIN_FILENO + 1, &rfds, NULL, NULL, &tv);
         return (retval > 0);
     }
-
 #endif
 
+// --- Color Constants ---
 const std::string Console::RESET   = "\033[0m";
 const std::string Console::BOLD    = "\033[1m";
 const std::string Console::RED     = "\033[31m";
@@ -101,6 +102,8 @@ const std::string Console::GREY    = "\033[90m";
 std::chrono::steady_clock::time_point Console::shellEndTime;
 bool Console::isShell = false;
 
+// --- Formatting & Output ---
+
 void Console::printHeader(std::string_view message) {
     enableAnsiSupport();
     std::cout << std::endl << BOLD << message << RESET << std::endl;
@@ -108,10 +111,7 @@ void Console::printHeader(std::string_view message) {
 
 void Console::printError(std::string_view sv) {
     enableAnsiSupport();
-
-    std::cerr << RED << "lptv " << RESET << BOLD << RED << "ERR! " << RESET;
-    std::cout << sv;
-    std::cout << std::endl;
+    std::cerr << RED << "lptv " << RESET << BOLD << RED << "ERR! " << RESET << sv << std::endl;
 }
 
 void Console::printHiddenPassword() {
@@ -163,9 +163,8 @@ void Console::printTable(
     std::cout << std::endl;
 }
 
-// === === === === ===
-//
-// === === === === ===
+// --- Input Handling ---
+
 bool Console::readLine(SecureString& out, bool echo) {
     enableAnsiSupport();
     std::cout.flush();
@@ -175,39 +174,38 @@ bool Console::readLine(SecureString& out, bool echo) {
     setRawMode(true);
 #endif
 
-    while(true) {
+    while (true) {
         int ch = 0;
         while (true) {
-            if(isShell && std::chrono::steady_clock::now() >= shellEndTime) {
+            if (isShell && std::chrono::steady_clock::now() >= shellEndTime) {
 #ifndef _WIN32
                 setRawMode(false);
 #endif
                 Console::printWarning("Shell session timeout (1 minutes elapsed). Exiting...");
-
                 std::this_thread::sleep_for(std::chrono::seconds(3));
                 Console::clear();
                 std::exit(0);
             }
-            if(kbhit()) {
+            if (kbhit()) {
                 ch = getch();
                 break;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
 
-        if(ch == 26) {
+        if (ch == 26) { // Ctrl+Z
 #ifndef _WIN32
             setRawMode(false);
 #endif
             return false;
         }
 
-        if(ch == 0 || ch == 0xE0) {
-            getch();
+        if (ch == 0 || ch == 0xE0) {
+            getch(); // Skip function keys / arrow keys prefix
             continue;
         }
 
-        switch(ch) {
+        switch (ch) {
         case '\r':
         case '\n':
             std::cout << '\n';
@@ -216,12 +214,11 @@ bool Console::readLine(SecureString& out, bool echo) {
 #endif
             return true;
 
-        case 127:
+        case 127: // Linux Backspace
         case '\b':
-            if(!out.empty()) {
+            if (!out.empty()) {
                 out.pop_back();
-
-                if(echo) {
+                if (echo) {
                     std::cout << "\b \b";
                     std::cout.flush();
                 }
@@ -229,9 +226,8 @@ bool Console::readLine(SecureString& out, bool echo) {
             break;
 
         default:
-            if(ch >= 32 && ch <= 126) {
+            if (ch >= 32 && ch <= 126) {
                 out.push_back(static_cast<char>(ch));
-
                 if (echo) {
                     std::cout.put(static_cast<char>(ch));
                     std::cout.flush();
@@ -250,6 +246,9 @@ bool Console::readSecureHiddenInput(SecureString& out) {
     return readLine(out, false);
 }
 
+// --- Clipboard Actions ---
+
+#ifdef _WIN32
 bool Console::copyToClipboard(const SecureString& text, int delaySeconds) {
     FILE* pipe = POPEN("clip", "w");
     if (!pipe) return false;
@@ -262,12 +261,47 @@ bool Console::copyToClipboard(const SecureString& text, int delaySeconds) {
                           + std::to_string(delaySeconds) 
                           + "; cmd.exe /c 'type nul | clip'\"";
         FILE* clearPipe = POPEN(cmd.c_str(), "w");
-        if(clearPipe) {
+        if (clearPipe) {
             PCLOSE(clearPipe);
         }
     }
     return true;
 }
+#else
+bool Console::copyToClipboard(const SecureString& text, int delaySeconds) {
+    std::string copyCmd;
+    if (system("command -v xclip > /dev/null 2>&1") == 0) {
+        copyCmd = "xclip -selection clipboard";
+    } else if (system("command -v xsel > /dev/null 2>&1") == 0) {
+        copyCmd = "xsel --clipboard --input";
+    } else if (system("command -v wl-copy > /dev/null 2>&1") == 0) {
+        copyCmd = "wl-copy";
+    } else if (system("command -v pbcopy > /dev/null 2>&1") == 0) {
+        copyCmd = "pbcopy";
+    }
+
+    if (copyCmd.empty()) {
+        Console::printWarning("No clipboard utility found (please install xclip, xsel, or wl-clipboard).");
+        return false;
+    }
+
+    FILE* pipe = popen(copyCmd.c_str(), "w");
+    if (!pipe) return false;
+
+    fprintf(pipe, "%s", text.c_str());
+    pclose(pipe);
+
+    if (delaySeconds > 0) {
+        std::string clearCmd = "(sleep " + std::to_string(delaySeconds) 
+                             + " && echo -n \"\" | " + copyCmd + ") > /dev/null 2>&1 &";
+        int ret = system(clearCmd.c_str());
+        (void)ret; // Suppress unused return value warning
+    }
+    return true;
+}
+#endif
+
+// --- Utility Functions ---
 
 void Console::clear() {
     enableAnsiSupport();
