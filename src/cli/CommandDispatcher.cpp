@@ -101,7 +101,7 @@ void CommandDispatcher::handleHelp(std::string_view cmdName) {
     HelpPrinter::printHelp(cmdName);
 }
 
-void CommandDispatcher::handleInit(const Command& cmd) {
+void CommandDispatcher::handleInit(const Command&) {
     if(Vault::exists()) {
         Console::printWarning("Password vault already exists.");
         return;
@@ -128,7 +128,7 @@ void CommandDispatcher::handleInit(const Command& cmd) {
     Console::printSuccess("Password vault initialized.");
 }
 
-void CommandDispatcher::handleShell(const Command& cmd) {
+void CommandDispatcher::handleShell(const Command&) {
     std::cout << Console::BOLD << "  Enter password" << Console::RESET << ": ";
     SecureString password;
     Console::readSecureHiddenInput(password);
@@ -173,7 +173,7 @@ void CommandDispatcher::handleShell(const Command& cmd) {
     Console::printInfo("Exiting interactive mode.");
 }
 
-void CommandDispatcher::handleStatus(const Command& cmd) {
+void CommandDispatcher::handleStatus(const Command&) {
     Console::printHeader("Vault Status");
     std::cout << "  Initialized : " << (Vault::exists() ? Console::GREEN + "Yes" : Console::RED + "No") << Console::RESET << "\n";
     std::cout << "  Unlocked    : " << (AuthGuard::verify() ? Console::GREEN + "Yes" : Console::RED + "No") << Console::RESET << "\n\n";
@@ -285,7 +285,7 @@ void CommandDispatcher::handleGenerate(const Command& cmd) {
     }
 }
 
-void CommandDispatcher::handleChangePassword(const Command& cmd) {
+void CommandDispatcher::handleChangePassword(const Command&) {
     requireUnlock();
     PasswordManager lptv;
 
@@ -309,7 +309,7 @@ void CommandDispatcher::handleChangePassword(const Command& cmd) {
     Console::printSuccess("Master password changed successfully.");
 }
 
-void CommandDispatcher::handleClear(const Command& cmd) {
+void CommandDispatcher::handleClear(const Command&) {
     Console::clear();
     if(Console::isShell) {
         std::cout << "\n";
