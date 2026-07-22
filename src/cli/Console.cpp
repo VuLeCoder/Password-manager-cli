@@ -80,7 +80,7 @@ void Console::printError(std::string_view sv) {
     std::cout << std::endl;
 }
 
-void Console::printHiddenPassword(const SecureString& password) {
+void Console::printHiddenPassword() {
     std::cout << "***********";
 }
 

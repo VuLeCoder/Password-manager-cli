@@ -10,7 +10,7 @@ public:
     static bool readSecureInput(SecureString&);
     static bool readSecureHiddenInput(SecureString&);
 
-    static void printHiddenPassword(const SecureString& password);
+    static void printHiddenPassword();
 
     static void printTable(
         const std::vector<std::string>& headers,
