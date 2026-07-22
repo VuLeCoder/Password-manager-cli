@@ -37,42 +37,53 @@
     #include <termios.h>
     #include <unistd.h>
     #include <fcntl.h>
+    #include <sys/select.h>
 
     #define POPEN  popen
     #define PCLOSE pclose
 
+    namespace {
+        termios original_tty;
+        bool tty_changed = false;
+
+        void setRawMode(bool enable) {
+            if (enable) {
+                if (tcgetattr(STDIN_FILENO, &original_tty) == 0) {
+                    termios newt = original_tty;
+                    newt.c_lflag &= ~(ICANON | ECHO);
+                    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+                    tty_changed = true;
+                }
+            } else {
+                if (tty_changed) {
+                    tcsetattr(STDIN_FILENO, TCSANOW, &original_tty);
+                    tty_changed = false;
+                }
+            }
+        }
+    }
+
     void Console::enableAnsiSupport() {}
 
     int Console::getch() {
-        unsigned char c;
-        if(read(STDIN_FILENO, &c, 1) == 1)
+        unsigned char c = 0;
+        ssize_t n = read(STDIN_FILENO, &c, 1);
+        if (n == 1) {
             return c;
-
+        }
         return EOF;
     }
 
     bool Console::kbhit() {
-        termios oldt{};
-        tcgetattr(STDIN_FILENO, &oldt);
+        fd_set rfds;
+        struct timeval tv;
+        FD_ZERO(&rfds);
+        FD_SET(STDIN_FILENO, &rfds);
+        tv.tv_sec = 0;
+        tv.tv_usec = 0;
 
-        termios newt = oldt;
-        newt.c_lflag &= ~(ICANON | ECHO); // non-canonical, không echo
-        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
-        int oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
-        fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
-
-        int ch = getchar();
-
-        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-        fcntl(STDIN_FILENO, F_SETFL, oldf);
-
-        if (ch != EOF) {
-            ungetc(ch, stdin);   // trả ký tự lại để lần sau vẫn đọc được
-            return true;
-        }
-
-        return false;
+        int retval = select(STDIN_FILENO + 1, &rfds, NULL, NULL, &tv);
+        return (retval > 0);
     }
 
 #endif
@@ -157,12 +168,20 @@ void Console::printTable(
 // === === === === ===
 bool Console::readLine(SecureString& out, bool echo) {
     enableAnsiSupport();
+    std::cout.flush();
     out.clear();
+
+#ifndef _WIN32
+    setRawMode(true);
+#endif
 
     while(true) {
         int ch = 0;
         while (true) {
             if(isShell && std::chrono::steady_clock::now() >= shellEndTime) {
+#ifndef _WIN32
+                setRawMode(false);
+#endif
                 Console::printWarning("Shell session timeout (1 minutes elapsed). Exiting...");
 
                 std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -177,6 +196,9 @@ bool Console::readLine(SecureString& out, bool echo) {
         }
 
         if(ch == 26) {
+#ifndef _WIN32
+            setRawMode(false);
+#endif
             return false;
         }
 
@@ -187,9 +209,14 @@ bool Console::readLine(SecureString& out, bool echo) {
 
         switch(ch) {
         case '\r':
+        case '\n':
             std::cout << '\n';
+#ifndef _WIN32
+            setRawMode(false);
+#endif
             return true;
 
+        case 127:
         case '\b':
             if(!out.empty()) {
                 out.pop_back();
