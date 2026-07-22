@@ -1,48 +1,48 @@
 # 🎉 LPTV Password Manager
 
-First public release.
+First public stable release.
 
 ## ✨ Highlights
 
-- AES-256-GCM encryption
-- Argon2id key derivation
-- SecureString integration
-- Binary encrypted storage
-- Cross-platform support (Windows & Linux)
+* AES-256-GCM encryption
+* Argon2id key derivation
+* SecureString integration
+* Binary encrypted storage
+* Cross-platform support (Windows & Linux)
 
 ## Features
 
 ### Vault
 
-- Initialize vault
-- Unlock vault
-- Lock vault
+* Initialize vault
+* Unlock vault
+* Lock vault
 
 ### Password Management
 
-- Add account
-- Get password
-- Update account
-- Delete account
-- Search account
-- List accounts
+* Add account
+* Get password
+* Update account
+* Delete account
+* Search accounts
+* List accounts
 
 ### Security
 
-- AES-256-GCM encryption
-- Argon2id key derivation
-- SecureString
-- Binary storage
+* AES-256-GCM encryption
+* Argon2id key derivation
+* SecureString for sensitive data
+* Encrypted binary storage
 
 ## ✅ Platform Support
 
-- **Windows (x64):** Fully tested and recommended for daily use.
-- **Ubuntu (x64):** Available as a preview build. Feedback and bug reports are welcome.
+* **Windows (x64):** Fully supported and tested.
+* **Ubuntu (x64):** Fully supported and tested.
 
 ## 📦 Downloads
 
 Download the package for your operating system from the **Assets** section below.
 
-## Thanks
+## ❤️ Thanks
 
-Thanks for trying **LPTV Password Manager** ❤️
+Thank you for trying **LPTV Password Manager**! Your feedback and suggestions are always welcome.
